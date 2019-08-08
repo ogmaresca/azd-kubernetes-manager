@@ -10,16 +10,21 @@ import (
 )
 
 var (
-	logLevel          = flag.String("log-level", "info", "Log level (trace, debug, info, warn, error, fatal, panic).")
-	rate              = flag.Duration("rate", 10*time.Second, "Duration to check the number of agents.")
-	azdToken          = flag.String("token", "", "The Azure Devops token.")
-	azdURL            = flag.String("url", "", "The Azure Devops URL. https://dev.azure.com/AccountName")
-	port              = flag.Int("port", 10101, "The port to serve health checks and metrics.")
+	logLevel   = flag.String("log-level", "info", "Log level (trace, debug, info, warn, error, fatal, panic).")
+	rate       = flag.Duration("rate", 10*time.Second, "Duration to check the number of agents.")
+	azdToken   = flag.String("token", "", "The Azure Devops token.")
+	azdURL     = flag.String("url", "", "The Azure Devops URL. https://dev.azure.com/AccountName")
+	basePath   = flag.String("base-path", "", "The path to prepend before every path.")
+	port       = flag.Int("port", 10102, "The port to serve HTTP requests.")
+	healthPort = flag.Int("healh-port", 90102, "The port to serve health checks and metrics.")
 )
 
 // Args holds all of the program arguments
 type Args struct {
 	Rate time.Duration
+
+	BasePath string
+	Port int
 
 	Logging    LoggingArgs
 	AZD        AzureDevopsArgs
@@ -54,15 +59,21 @@ func ArgsFromFlags() Args {
 	logrusLevel, _ := log.ParseLevel(*logLevel)
 	return Args{
 		Rate: *rate,
+
+		BasePath: *basePath,
+		Port: *port,
+
 		Logging: LoggingArgs{
 			Level: logrusLevel,
 		},
+
 		AZD: AzureDevopsArgs{
 			Token: *azdToken,
 			URL:   *azdURL,
 		},
+
 		Health: HealthArgs{
-			Port: *port,
+			Port: *healthPort,
 		},
 	}
 }
@@ -88,6 +99,9 @@ func ValidateArgs() error {
 	}*/
 	if *port < 0 {
 		validationErrors = append(validationErrors, "The port must be greater than 0.")
+	}
+	if *healthPort < 0 {
+		validationErrors = append(validationErrors, "The health port must be greater than 0.")
 	}
 	if len(validationErrors) > 0 {
 		return fmt.Errorf("Error(s) with arguments:\n%s", strings.Join(validationErrors, "\n"))
