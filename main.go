@@ -11,8 +11,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/args"
+	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/config"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/health"
+	"github.com/ggmaresca/azd-kubernetes-manager/pkg/kubernetes"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/logging"
 )
 
@@ -28,11 +30,11 @@ func main() {
 	logging.Logger.SetLevel(args.Logging.Level)
 
 	// Initialize
-	/*azdClient := azuredevops.MakeClient(args.AZD.URL, args.AZD.Token)
+	//azdClient := azuredevops.MakeClient(args.AZD.URL, args.AZD.Token)
 	k8sClient, err := kubernetes.MakeClient()
 	if err != nil {
 		panic(err.Error())
-	}*/
+	}
 
 	configFileYaml, err := ioutil.ReadFile(args.ConfigFile)
 	if err != nil {
@@ -47,6 +49,7 @@ func main() {
 
 	func() {
 		mux := http.NewServeMux()
+		mux.Handle("/serviceHooks", azuredevops.NewServiceHookHandler(args, configFile, k8sClient))
 
 		var healthMux *http.ServeMux
 		if args.ServiceHooks.Port != args.Health.Port {

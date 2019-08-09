@@ -1,18 +1,18 @@
-package config
+package args
 
-// TemplateArgs holds all of the values available to go templating at runtime
-type TemplateArgs struct {
+// Args holds all of the values available to go templating at runtime
+type Args struct {
 	EventType string
 
-	PullRequestId int
+	PullRequestID int
 
-	BuildId int
+	BuildID int
 
 	BuildNumber string
 
 	ProjectName string
 
-	ResourceUrl string
+	ResourceURL string
 
 	ResouceStartTime string
 

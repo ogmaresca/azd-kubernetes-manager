@@ -131,6 +131,11 @@ func ValidateArgs() error {
 	if *healthPort <= 0 {
 		validationErrors = append(validationErrors, "The health port must be greater than 0.")
 	}
+
+	if *username != *password && (*username == "" || *password == "") {
+		validationErrors = append(validationErrors, "Either the both or neither of the username and password must be provided.")
+	}
+
 	if len(validationErrors) > 0 {
 		return fmt.Errorf("Error(s) with arguments:\n%s", strings.Join(validationErrors, "\n"))
 	}
