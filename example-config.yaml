@@ -1,0 +1,29 @@
+serviceHooks:
+- event: git.pullrequest.updated
+  resourceStatuses:
+  - completed
+  rules:
+    delete:
+    - apiVersion: v1
+      kind: Namespace
+      selector:
+        matchLabels:
+          azdPullRequestId: '{{ .PullRequestId }}'
+        matchExpressions:
+        - key: azdPreserve
+          operator: DoesNotExist
+          values: []
+- event: build.complete
+  resourceReasons:
+  - manual
+  rules:
+    delete:
+    - apiVersion: v1
+      kind: Namespace
+      selector:
+        matchLabels:
+          azdBuildId: '{{ .BuildId }}'
+        matchExpressions:
+        - key: azdPreserve
+          operator: DoesNotExist
+          values: []

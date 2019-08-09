@@ -1,18 +1,18 @@
 // main is the main package - golint fix
 package main
 
-import(
+import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
-	//"time"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/args"
-	//"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
+	"github.com/ggmaresca/azd-kubernetes-manager/pkg/config"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/health"
-	//"github.com/ggmaresca/azd-kubernetes-manager/pkg/kubernetes"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/logging"
 )
 
@@ -27,40 +27,56 @@ func main() {
 
 	logging.Logger.SetLevel(args.Logging.Level)
 
-	// Initialize Azure Devops client
+	// Initialize
 	/*azdClient := azuredevops.MakeClient(args.AZD.URL, args.AZD.Token)
 	k8sClient, err := kubernetes.MakeClient()
 	if err != nil {
 		panic(err.Error())
 	}*/
 
-	go func() {
+	configFileYaml, err := ioutil.ReadFile(args.ConfigFile)
+	if err != nil {
+		logging.Logger.Panicf("Error reading config file \"%s\": %s", args.ConfigFile, err.Error())
+	}
+	configFile, err := config.NewConfigFile(configFileYaml)
+	if err != nil {
+		logging.Logger.Panicf("Error parsing config file \"%s\": %s", args.ConfigFile, err.Error())
+	}
+
+	logging.Logger.Tracef("Parsed config file: %v", configFile)
+
+	func() {
 		mux := http.NewServeMux()
 
-		healthMux := mux
-		if(args.Port != args.Health.Port) {
-			healthMux = http.NewServeMux();
+		var healthMux *http.ServeMux
+		if args.ServiceHooks.Port != args.Health.Port {
+			healthMux = http.NewServeMux()
+		} else {
+			healthMux = mux
 		}
 
 		healthMux.Handle("/healthz", health.LivenessCheck{})
 		healthMux.Handle("/metrics", promhttp.Handler())
 
-		err := http.ListenAndServe(fmt.Sprintf(":%d", args.Port), mux)
-		if err != nil {
-			logging.Logger.Panicf("Error serving HTTP requests: %s", err.Error())
-		}
-		
-		if(args.Port != args.Health.Port) {
-			err = http.ListenAndServe(fmt.Sprintf(":%d", args.Health.Port), healthMux)
+		go func() {
+			err := http.ListenAndServe(fmt.Sprintf(":%d", args.ServiceHooks.Port), mux)
 			if err != nil {
-				logging.Logger.Panicf("Error serving health checks and metrics: %s", err.Error())
+				logging.Logger.Panicf("Error serving HTTP requests: %s", err.Error())
 			}
+		}()
+
+		if args.ServiceHooks.Port != args.Health.Port {
+			go func() {
+				err = http.ListenAndServe(fmt.Sprintf(":%d", args.Health.Port), healthMux)
+				if err != nil {
+					logging.Logger.Panicf("Error serving health checks and metrics: %s", err.Error())
+				}
+			}()
 		}
 	}()
 
 	for {
-		// TODO Implement loop
-		//time.Sleep(args.Rate)
+		time.Sleep(args.Rate)
 	}
 
 	logging.Logger.Info("Exiting azd-kubernetes-manager")

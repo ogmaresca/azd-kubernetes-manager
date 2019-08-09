@@ -5,7 +5,7 @@ go-build:
 	go build -o ../bin/azd-kubernetes-manager .
 
 go-run:
-	../bin/azd-kubernetes-manager --token=${AZURE_DEVOPS_TOKEN} --url=${AZURE_DEVOPS_URL} --log-level=Trace
+	../bin/azd-kubernetes-manager --token=${AZURE_DEVOPS_TOKEN} --url=${AZURE_DEVOPS_URL} --config-file example-config.yaml --log-level=Trace
 
 go-test:
 	go test github.com/ggmaresca/azd-kubernetes-manager/pkg/tests
