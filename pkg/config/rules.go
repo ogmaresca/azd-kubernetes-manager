@@ -3,8 +3,6 @@ package config
 import (
 	"fmt"
 	"strings"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Rules lists all of the rules to perform upon an event
@@ -22,7 +20,7 @@ type DeleteResourceRule struct {
 	Kind string `yaml:"kind"`
 
 	// The label selector
-	Selector metav1.LabelSelector `yaml:"selector"`
+	Selector LabelSelector `yaml:"selector"`
 
 	// The maximum resources to delete. If the number of returned resources is < limit, then fail
 	Limit *int `yaml:"limit"`
