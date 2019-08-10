@@ -10,12 +10,17 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
+	"github.com/alexcesaro/log/stdlog"
+
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/args"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/config"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/health"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/kubernetes"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/logging"
+)
+
+var (
+	logger = stdlog.GetFromFlags()
 )
 
 func main() {
@@ -25,9 +30,7 @@ func main() {
 	if err := args.ValidateArgs(); err != nil {
 		panic(err.Error())
 	}
-	args := args.ArgsFromFlags()
-
-	logging.Logger.SetLevel(args.Logging.Level)
+	args := args.FromFlags()
 
 	// Initialize
 	//azdClient := azuredevops.MakeClient(args.AZD.URL, args.AZD.Token)
@@ -38,14 +41,16 @@ func main() {
 
 	configFileYaml, err := ioutil.ReadFile(args.ConfigFile)
 	if err != nil {
-		logging.Logger.Panicf("Error reading config file \"%s\": %s", args.ConfigFile, err.Error())
+		Panicf("Error reading config file \"%s\": %s", args.ConfigFile, err.Error())
 	}
 	configFile, err := config.NewConfigFile(configFileYaml)
 	if err != nil {
-		logging.Logger.Panicf("Error parsing config file \"%s\": %s", args.ConfigFile, err.Error())
+		Panicf("Error parsing config file \"%s\": %s", args.ConfigFile, err.Error())
 	}
 
-	logging.Logger.Tracef("Parsed config file: %v", configFile)
+	logger.Debugf("Parsed config file:\n%#v", configFile)
+
+	logger.Infof("\n%s", configFile.Describe())
 
 	func() {
 		mux := http.NewServeMux()
@@ -64,7 +69,7 @@ func main() {
 		go func() {
 			err := http.ListenAndServe(fmt.Sprintf(":%d", args.ServiceHooks.Port), mux)
 			if err != nil {
-				logging.Logger.Panicf("Error serving HTTP requests: %s", err.Error())
+				Panicf("Error serving HTTP requests: %s", err.Error())
 			}
 		}()
 
@@ -72,7 +77,7 @@ func main() {
 			go func() {
 				err = http.ListenAndServe(fmt.Sprintf(":%d", args.Health.Port), healthMux)
 				if err != nil {
-					logging.Logger.Panicf("Error serving health checks and metrics: %s", err.Error())
+					Panicf("Error serving health checks and metrics: %s", err.Error())
 				}
 			}()
 		}
@@ -81,6 +86,9 @@ func main() {
 	for {
 		time.Sleep(args.Rate)
 	}
+}
 
-	logging.Logger.Info("Exiting azd-kubernetes-manager")
+// Panicf panics with a formatted message
+func Panicf(format string, a ...interface{}) {
+	panic(fmt.Sprintf(format, a...))
 }

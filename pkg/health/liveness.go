@@ -3,13 +3,15 @@ package health
 import (
 	"net/http"
 
+	"github.com/alexcesaro/log/stdlog"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/logging"
 )
 
 var (
+	logger = stdlog.GetFromFlags()
+
 	livenessProbeCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "azd_kubernetes_manager_liveness_probe_count",
 		Help: "The total number of liveness probes",
@@ -21,7 +23,7 @@ type LivenessCheck struct {
 }
 
 func (c LivenessCheck) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	logging.Logger.Trace("Liveness probe")
+	logger.Debug("Liveness probe")
 
 	livenessProbeCounter.Inc()
 

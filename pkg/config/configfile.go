@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"strings"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"gopkg.in/yaml.v2"
@@ -64,4 +67,42 @@ func NewConfigFile(configFileYaml []byte) (ConfigFile, error) {
 	err := yaml.Unmarshal(configFileYaml, &configFile)
 
 	return configFile, err
+}
+
+// Describe returns a user-friendly representation of a ConfigFile
+func (c ConfigFile) Describe() string {
+	description := "==============\nService Hooks:\n=============="
+
+	for _, serviceHook := range c.ServiceHooks {
+		description += fmt.Sprintf("\n- %s", strings.ReplaceAll(serviceHook.Describe(), "\n", "\n  "))
+	}
+
+	return description
+}
+
+// Describe returns a user-friendly representation of a ServiceHook
+func (sh ServiceHook) Describe() string {
+	return fmt.Sprintf(
+		"Event Type: %s\nResource Filters:\n  Statuses: %v\n  Reasons: %+v\n  Projects: %#v\nContinue: %t\nRules:\n  %s",
+		sh.Event, sh.ResourceStatuses, sh.ResourceReasons, sh.ProjectNames, sh.Continue, strings.ReplaceAll(sh.Rules.Describe(), "\n", "\n  "),
+	)
+}
+
+// Describe returns a user-friendly representation of a Rules
+func (r Rules) Describe() string {
+	description := "Resource deletion rules:"
+
+	for _, serviceHook := range r.Delete {
+		description += fmt.Sprintf("\n- %s", strings.ReplaceAll(serviceHook.Describe(), "\n", "\n  "))
+	}
+
+	return description
+}
+
+// Describe returns a user-friendly representation of a DeleteResourceRule
+func (r DeleteResourceRule) Describe() string {
+	return fmt.Sprintf(
+		"API Version: %s\nKinds: %s\nLimit: %d\nLabel Selector:\n  %s",
+		r.APIVersion, r.Kind, r.Limit, strings.ReplaceAll(fmt.Sprintf("%+v", r.Selector), "\n", "\n  "),
+	)
 }

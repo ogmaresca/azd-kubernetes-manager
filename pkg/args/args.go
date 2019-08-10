@@ -6,12 +6,9 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var (
-	logLevel   = flag.String("log-level", "info", "Log level (trace, debug, info, warn, error, fatal, panic).")
 	rate       = flag.Duration("rate", 10*time.Second, "Duration to check the number of agents.")
 	azdToken   = flag.String("token", "", "The Azure Devops token.")
 	azdURL     = flag.String("url", "", "The Azure Devops URL. https://dev.azure.com/AccountName")
@@ -28,7 +25,6 @@ type Args struct {
 	Rate         time.Duration
 	ConfigFile   string
 	ServiceHooks ServiceHookArgs
-	Logging      LoggingArgs
 	AZD          AzureDevopsArgs
 	Health       HealthArgs
 }
@@ -37,11 +33,6 @@ type Args struct {
 type ScaleDownArgs struct {
 	Delay time.Duration
 	Max   int32
-}
-
-// LoggingArgs holds all of the logging related args
-type LoggingArgs struct {
-	Level log.Level
 }
 
 // ServiceHookArgs holds all of the service hook related args
@@ -63,10 +54,9 @@ type AzureDevopsArgs struct {
 	URL   string
 }
 
-// ArgsFromFlags returns an Args parsed from the program flags
-func ArgsFromFlags() Args {
+// FromFlags returns an Args parsed from the program flags
+func FromFlags() Args {
 	// error should be validated in ValidateArgs()
-	logrusLevel, _ := log.ParseLevel(*logLevel)
 	return Args{
 		Rate:       *rate,
 		ConfigFile: *configFile,
@@ -76,10 +66,6 @@ func ArgsFromFlags() Args {
 			Port:     *port,
 			Username: *username,
 			Password: *password,
-		},
-
-		Logging: LoggingArgs{
-			Level: logrusLevel,
 		},
 
 		AZD: AzureDevopsArgs{
@@ -97,10 +83,6 @@ func ArgsFromFlags() Args {
 func ValidateArgs() error {
 	// Validate arguments
 	var validationErrors []string
-	_, err := log.ParseLevel(*logLevel)
-	if err != nil {
-		validationErrors = append(validationErrors, err.Error())
-	}
 	if rate == nil {
 		validationErrors = append(validationErrors, "Rate is required.")
 	} else if rate.Seconds() <= 1 {

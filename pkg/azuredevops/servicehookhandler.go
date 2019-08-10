@@ -6,16 +6,19 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/alexcesaro/log/stdlog"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/args"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/config"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/kubernetes"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/logging"
 )
 
 var (
+	logger = stdlog.GetFromFlags()
+
 	serviceHookCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "azd_kubernetes_manager_service_hook_count",
 		Help: "The total number of Service Hooks",
@@ -41,7 +44,7 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 	defer timer.ObserveDuration()
 
 	if !strings.EqualFold(request.Method, "POST") {
-		logging.Logger.Errorf("Service hooks must be POST requests - received %s method", request.Method)
+		logger.Errorf("Service hooks must be POST requests - received %s method", request.Method)
 		writer.WriteHeader(405)
 		return
 	}
@@ -49,17 +52,18 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 	buffer := new(bytes.Buffer)
 	_, err := buffer.ReadFrom(request.Body)
 	if err != nil {
-		logging.Logger.Errorf("Error reading request body from service hook: %s", err.Error())
+		logger.Errorf("Error reading request body from service hook: %s", err.Error())
 		writer.WriteHeader(500)
 		return
 	}
 	requestStr := string(buffer.Bytes())
 
-	logging.Logger.Debugf("Received service hook: \n%s", requestStr)
+	logger.Debugf("Received service hook: %s", requestStr)
 
 	requestObj := new(ServiceHook)
 	if err = json.NewDecoder(strings.NewReader(requestStr)).Decode(requestObj); err != nil {
-		logging.Logger.Errorf("Error - could not parse JSON from Service hook. Error: %s\nRequest:\n%s", err.Error(), requestStr)
+		logger.Errorf(`Error - could not parse JSON from Service hook. Error: %s
+		Request: %s`, err.Error(), requestStr)
 		writer.WriteHeader(400)
 		return
 	}
