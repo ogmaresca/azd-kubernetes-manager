@@ -33,7 +33,7 @@ var (
 // ServiceHookHandler is an HTTP handler for service hooks
 type ServiceHookHandler struct {
 	args      args.Args
-	config    config.ConfigFile
+	config    config.File
 	k8sClient kubernetes.ClientAsync
 }
 
@@ -77,7 +77,7 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 }
 
 // NewServiceHookHandler creates a an HTTP handler for Service Hooks
-func NewServiceHookHandler(args args.Args, config config.ConfigFile, k8sClient kubernetes.ClientAsync) ServiceHookHandler {
+func NewServiceHookHandler(args args.Args, config config.File, k8sClient kubernetes.ClientAsync) ServiceHookHandler {
 	return ServiceHookHandler{
 		args:      args,
 		config:    config,

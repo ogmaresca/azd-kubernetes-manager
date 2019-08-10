@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -39,18 +40,7 @@ func main() {
 		panic(err.Error())
 	}
 
-	configFileYaml, err := ioutil.ReadFile(args.ConfigFile)
-	if err != nil {
-		Panicf("Error reading config file \"%s\": %s", args.ConfigFile, err.Error())
-	}
-	configFile, err := config.NewConfigFile(configFileYaml)
-	if err != nil {
-		Panicf("Error parsing config file \"%s\": %s", args.ConfigFile, err.Error())
-	}
-
-	logger.Debugf("Parsed config file:\n%#v", configFile)
-
-	logger.Infof("\n%s", configFile.Describe())
+	configFile := getConfigFile(args)
 
 	func() {
 		mux := http.NewServeMux()
@@ -69,7 +59,7 @@ func main() {
 		go func() {
 			err := http.ListenAndServe(fmt.Sprintf(":%d", args.ServiceHooks.Port), mux)
 			if err != nil {
-				Panicf("Error serving HTTP requests: %s", err.Error())
+				panicf("Error serving HTTP requests: %s", err.Error())
 			}
 		}()
 
@@ -77,7 +67,7 @@ func main() {
 			go func() {
 				err = http.ListenAndServe(fmt.Sprintf(":%d", args.Health.Port), healthMux)
 				if err != nil {
-					Panicf("Error serving health checks and metrics: %s", err.Error())
+					panicf("Error serving health checks and metrics: %s", err.Error())
 				}
 			}()
 		}
@@ -88,7 +78,31 @@ func main() {
 	}
 }
 
-// Panicf panics with a formatted message
-func Panicf(format string, a ...interface{}) {
+// panicf panics with a formatted message
+func panicf(format string, a ...interface{}) {
 	panic(fmt.Sprintf(format, a...))
+}
+
+func getConfigFile(args args.Args) config.File {
+	configFileYaml, err := ioutil.ReadFile(args.ConfigFile)
+	if err != nil {
+		panicf("Error reading config file \"%s\": %s", args.ConfigFile, err.Error())
+	}
+	configFile, err := config.NewConfigFile(configFileYaml)
+	if err != nil {
+		panicf("Error parsing config file \"%s\": %s", args.ConfigFile, err.Error())
+	}
+
+	logger.Debugf("Parsed config file:\n%#v", configFile)
+
+	logger.Infof("\n%s", configFile.Describe())
+
+	configFileWarnings, err := configFile.Validate()
+	if len(configFileWarnings) > 0 {
+		logger.Warningf("Warnings from config file:\n%s", strings.Join(configFileWarnings, "\n"))
+	}
+	if err != nil {
+		panicf("Errors from config file:\n%s", err.Error())
+	}
+	return configFile
 }
