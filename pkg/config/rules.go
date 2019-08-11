@@ -47,7 +47,7 @@ func (r Rules) Describe() string {
 func (r DeleteResourceRule) Describe() string {
 	return fmt.Sprintf(
 		"API Version: %s\nKinds: %s\nLimit: %d\nLabel Selector:\n  %s",
-		r.APIVersion, r.Kind, r.Limit, strings.ReplaceAll(fmt.Sprintf("%+v", r.Selector), "\n", "\n  "),
+		r.APIVersion, r.Kind, r.Limit, strings.ReplaceAll(r.Selector.Describe(), "\n", "\n  "),
 	)
 }
 
@@ -61,24 +61,12 @@ func (r Rules) Validate() ([]string, error) {
 		return []string{"No rules were defined"}, nil
 	}
 
-	var errors []string
-	var warnings []string
-	for pos, deleteRule := range r.Delete {
-		ruleWarnings, err := deleteRule.Validate()
-		if len(warnings) > 0 {
-			warnings = append(warnings, fmt.Sprintf("Warnings from Delete Resource rule definition %d:%s", pos, joinYAMLSlice(ruleWarnings)))
-		}
-		if err != nil {
-			errors = append(errors, fmt.Sprintf("Errors from Delete Resource rule definition %d:\n    %s", pos, strings.ReplaceAll(err.Error(), "\n", "\n  ")))
-		}
+	var fileSections []FileSection
+	for _, value := range r.Delete {
+		fileSections = append(fileSections, value)
 	}
 
-	var err error
-	if len(errors) > 0 {
-		err = fmt.Errorf("%s", strings.Join(errors, "\n"))
-	}
-
-	return warnings, err
+	return validate(fileSections, "Delete Resource rule definition")
 }
 
 // Validate a Delete Kubernetes Resouce rule definition. This function returns a slice of warnings and an error.
@@ -94,6 +82,14 @@ func (r DeleteResourceRule) Validate() ([]string, error) {
 		errors = append(errors, "The Kubernetes resource `Kind` must be defined.")
 	}
 
+	selectorWarnings, err := r.Selector.Validate()
+	if len(selectorWarnings) > 0 {
+		warnings = append(warnings, selectorWarnings...)
+	}
+	if err != nil {
+		errors = append(errors, err.Error())
+	}
+
 	if len(r.Selector.MatchLabels) == 0 && len(r.Selector.MatchExpressions) == 0 {
 		errors = append(errors, "No label `Selector` was defined. See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ for defining set-based requirement selectors.")
 	}
@@ -102,7 +98,6 @@ func (r DeleteResourceRule) Validate() ([]string, error) {
 		errors = append(errors, "If a `Limit` is defined, it must be greater than 0.")
 	}
 
-	var err error
 	if len(errors) > 0 {
 		err = fmt.Errorf("%s", strings.Join(errors, "\n"))
 	}

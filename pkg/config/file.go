@@ -1,9 +1,6 @@
 package config
 
 import (
-	"fmt"
-	"strings"
-
 	"gopkg.in/yaml.v2"
 )
 
@@ -47,30 +44,10 @@ func (c File) Validate() ([]string, error) {
 		return []string{"No rules were defined. azd-kubernetes-manager will just log Service Hook requests."}, nil
 	}
 
-	var errors []string
-	var warnings []string
-	for pos, serviceHook := range c.ServiceHooks {
-		serviceHookWarnings, err := serviceHook.Validate()
-		if len(warnings) > 0 {
-			warnings = append(warnings, fmt.Sprintf("Warnings from Service Hook definition %d:%s", pos, joinYAMLSlice(serviceHookWarnings)))
-		}
-		if err != nil {
-			errors = append(errors, fmt.Sprintf("Errors from Service Hook definition %d:\n    %s", pos, strings.ReplaceAll(err.Error(), "\n", "\n  ")))
-		}
+	var fileSections []FileSection
+	for _, value := range c.ServiceHooks {
+		fileSections = append(fileSections, value)
 	}
 
-	var err error
-	if len(errors) > 0 {
-		err = fmt.Errorf("%s", strings.Join(errors, "\n"))
-	}
-
-	return warnings, err
-}
-
-func joinYAMLSlice(slice []string) string {
-	str := ""
-	for _, val := range slice {
-		str += fmt.Sprintf("\n- %s", strings.ReplaceAll(val, "\n", "\n  "))
-	}
-	return str
+	return validate(fileSections, "Service Hook definition")
 }
