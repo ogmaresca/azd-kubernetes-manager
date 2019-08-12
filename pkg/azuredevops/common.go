@@ -1,8 +1,14 @@
 package azuredevops
 
-// Definition is the base type for Azure Devops responses
-type Definition struct {
+// IntDefinition is the base type for Azure Devops responses
+type IntDefinition struct {
 	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+// StrDefinition is the base type for Azure Devops responses
+type StrDefinition struct {
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -26,3 +32,29 @@ type Error struct {
 	ErrorCode int    `json:"errorCode"`
 	EventID   int    `json:"eventId"`
 }
+
+// Status are the common Azure Devops statuses
+type Status string
+
+const (
+	// StatusSucceeded is for resources that have completed successfuly
+	StatusSucceeded Status = "succeeded"
+	// StatusAbandoned is for resources that have been abandoned
+	StatusAbandoned Status = "abandoned"
+	// StatusActive is for resources that are active
+	StatusActive Status = "active"
+	// StatusCompleted is for resources that are completed without a substatus
+	StatusCompleted Status = "completed"
+	// StatusQueued is for resources that are waiting to run
+	StatusQueued Status = "queued"
+)
+
+// Reason are the common Azure Devops reasons
+type Reason string
+
+const (
+	// ReasonManual is for manually triggered reasources
+	ReasonManual Reason = "manual"
+	// ReasonContinuousIntegration is for automatically triggered reasources in a CI process
+	ReasonContinuousIntegration Reason = "continuousIntegration"
+)

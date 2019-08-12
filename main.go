@@ -14,10 +14,10 @@ import (
 	"github.com/alexcesaro/log/stdlog"
 
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/args"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/config"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/health"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/kubernetes"
+	"github.com/ggmaresca/azd-kubernetes-manager/pkg/processors"
 )
 
 var (
@@ -42,36 +42,7 @@ func main() {
 
 	configFile := getConfigFile(args)
 
-	func() {
-		mux := http.NewServeMux()
-		mux.Handle("/serviceHooks", azuredevops.NewServiceHookHandler(args, configFile, k8sClient))
-
-		var healthMux *http.ServeMux
-		if args.ServiceHooks.Port != args.Health.Port {
-			healthMux = http.NewServeMux()
-		} else {
-			healthMux = mux
-		}
-
-		healthMux.Handle("/healthz", health.LivenessCheck{})
-		healthMux.Handle("/metrics", promhttp.Handler())
-
-		go func() {
-			err := http.ListenAndServe(fmt.Sprintf(":%d", args.ServiceHooks.Port), mux)
-			if err != nil {
-				panicf("Error serving HTTP requests: %s", err.Error())
-			}
-		}()
-
-		if args.ServiceHooks.Port != args.Health.Port {
-			go func() {
-				err = http.ListenAndServe(fmt.Sprintf(":%d", args.Health.Port), healthMux)
-				if err != nil {
-					panicf("Error serving health checks and metrics: %s", err.Error())
-				}
-			}()
-		}
-	}()
+	serveHTTP(args, configFile, k8sClient)
 
 	for {
 		time.Sleep(args.Rate)
@@ -105,4 +76,35 @@ func getConfigFile(args args.Args) config.File {
 		panicf("Errors from config file:\n%s", err.Error())
 	}
 	return configFile
+}
+
+func serveHTTP(args args.Args, config config.File, k8sClient kubernetes.ClientAsync) {
+	mux := http.NewServeMux()
+	mux.Handle("/serviceHooks", processors.NewServiceHookHandler(args, configFile, k8sClient))
+
+	var healthMux *http.ServeMux
+	if args.ServiceHooks.Port != args.Health.Port {
+		healthMux = http.NewServeMux()
+	} else {
+		healthMux = mux
+	}
+
+	healthMux.Handle("/healthz", health.LivenessCheck{})
+	healthMux.Handle("/metrics", promhttp.Handler())
+
+	go func() {
+		err := http.ListenAndServe(fmt.Sprintf(":%d", args.ServiceHooks.Port), mux)
+		if err != nil {
+			panicf("Error serving HTTP requests: %s", err.Error())
+		}
+	}()
+
+	if args.ServiceHooks.Port != args.Health.Port {
+		go func() {
+			err = http.ListenAndServe(fmt.Sprintf(":%d", args.Health.Port), healthMux)
+			if err != nil {
+				panicf("Error serving health checks and metrics: %s", err.Error())
+			}
+		}()
+	}
 }

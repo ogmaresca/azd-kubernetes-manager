@@ -2,10 +2,15 @@ package config
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
 func joinYAMLSlice(slice []string) string {
+	if len(slice) == 0 {
+		return "[]"
+	}
+
 	str := ""
 	for _, val := range slice {
 		str += fmt.Sprintf("\n- %s", strings.ReplaceAll(val, "\n", "\n  "))
@@ -32,4 +37,44 @@ func validate(slice []FileSection, description string) ([]string, error) {
 	}
 
 	return warnings, err
+}
+
+func contains(value string, filters []string) bool {
+	if len(filters) == 0 {
+		return true
+	}
+	for _, filter := range filters {
+		if strings.EqualFold(value, filter) {
+			return true
+		}
+	}
+	return false
+}
+
+func intersection(values []string, filters []string) bool {
+	if len(values) == 0 || len(filters) == 0 {
+		return true
+	}
+	for _, value := range values {
+		if contains(value, filters) {
+			return true
+		}
+	}
+	return false
+}
+
+func containsPOSIXERE(value string, filters []string) (bool, error) {
+	if len(filters) == 0 {
+		return true, nil
+	}
+	for _, filter := range filters {
+		pattern, err := regexp.CompilePOSIX(filter)
+		if err != nil {
+			return false, nil
+		}
+		if pattern.Match([]byte(value)) {
+			return true, nil
+		}
+	}
+	return false, nil
 }

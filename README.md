@@ -10,9 +10,3 @@ azd-kubernetes-manager manages Kubernetes resources for Azure Devops.
 
 * Taking actions after Pull Requests are completed (API and service hooks) (planned).
 
-## Arguments
-
-| Argument  | Description  |
-|---|---|
-| log | stdlog minimum levels. Allowed values are debug, info, notice, warning, error, critical, alert, emergency and none.  |
-

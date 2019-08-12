@@ -1,4 +1,4 @@
-package azuredevops
+package processors
 
 import (
 	"bytes"
@@ -12,6 +12,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/args"
+	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/config"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/kubernetes"
 )
@@ -60,13 +61,14 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 
 	logger.Debugf("Received service hook: %s", requestStr)
 
-	requestObj := new(ServiceHook)
+	requestObj := new(azuredevops.ServiceHook)
 	if err = json.NewDecoder(strings.NewReader(requestStr)).Decode(requestObj); err != nil {
 		logger.Errorf(`Error - could not parse JSON from Service hook. Error: %s
 		Request: %s`, err.Error(), requestStr)
 		writer.WriteHeader(400)
 		return
 	}
+	logger.Debugf("Deserialized response to: %#v", requestObj)
 
 	// TODO handle basic authentication
 

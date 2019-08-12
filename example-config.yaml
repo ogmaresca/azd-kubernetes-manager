@@ -1,7 +1,11 @@
 serviceHooks:
 - event: git.pullrequest.updated
-  resourceStatuses:
-  - completed
+  resourceFilters:
+    statuses:
+    - completed
+    - abandoned
+    environments:
+    - PR
   rules:
     delete:
     - apiVersion: v1
@@ -14,8 +18,11 @@ serviceHooks:
           operator: DoesNotExist
           values: []
 - event: build.complete
-  resourceReasons:
-  - manual
+  resourceFilters:
+    reasons:
+    - manual
+    environments:
+    - PR
   rules:
     delete:
     - apiVersion: v1
@@ -25,5 +32,8 @@ serviceHooks:
           azdBuildId: '{{ .BuildId }}'
         matchExpressions:
         - key: azdPreserve
+          operator: DoesNotExist
+          values: []
+        - key: azdPullRequestId
           operator: DoesNotExist
           values: []
