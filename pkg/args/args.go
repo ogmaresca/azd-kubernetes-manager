@@ -43,6 +43,11 @@ type ServiceHookArgs struct {
 	Password string
 }
 
+// UseBasicAuthentication returns true if the Username and Password are not empty
+func (a ServiceHookArgs) UseBasicAuthentication() bool {
+	return a.Username != "" && a.Password != ""
+}
+
 // HealthArgs holds all of the healthcheck related args
 type HealthArgs struct {
 	Port int

@@ -64,7 +64,9 @@ func getConfigFile(args args.Args) config.File {
 		panicf("Error parsing config file \"%s\": %s", args.ConfigFile, err.Error())
 	}
 
-	logger.Debugf("Parsed config file:\n%#v", configFile)
+	if logger.LogDebug() {
+		logger.Debugf("Parsed config file:\n%#v", configFile)
+	}
 
 	logger.Infof("\n%s", configFile.Describe())
 
@@ -78,7 +80,7 @@ func getConfigFile(args args.Args) config.File {
 	return configFile
 }
 
-func serveHTTP(args args.Args, config config.File, k8sClient kubernetes.ClientAsync) {
+func serveHTTP(args args.Args, configFile config.File, k8sClient kubernetes.ClientAsync) {
 	mux := http.NewServeMux()
 	mux.Handle("/serviceHooks", processors.NewServiceHookHandler(args, configFile, k8sClient))
 
@@ -101,7 +103,7 @@ func serveHTTP(args args.Args, config config.File, k8sClient kubernetes.ClientAs
 
 	if args.ServiceHooks.Port != args.Health.Port {
 		go func() {
-			err = http.ListenAndServe(fmt.Sprintf(":%d", args.Health.Port), healthMux)
+			err := http.ListenAndServe(fmt.Sprintf(":%d", args.Health.Port), healthMux)
 			if err != nil {
 				panicf("Error serving health checks and metrics: %s", err.Error())
 			}

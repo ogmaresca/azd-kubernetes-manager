@@ -3,6 +3,7 @@ package processors
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -20,15 +21,20 @@ import (
 var (
 	logger = stdlog.GetFromFlags()
 
-	serviceHookCounter = promauto.NewCounter(prometheus.CounterOpts{
+	serviceHookCounter = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "azd_kubernetes_manager_service_hook_count",
 		Help: "The total number of Service Hooks",
-	})
+	}, []string{"eventType"})
 
-	serviceHookDurationHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
+	serviceHookDurationHistogram = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Name: "azd_kubernetes_manager_service_hook_duration_seconds",
 		Help: "The duration of Service Hook requests",
-	})
+	}, []string{"eventType"})
+
+	serviceHookErrorCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "azd_kubernetes_manager_service_hook_error_count",
+		Help: "The total number of Service Hooks",
+	}, []string{"eventType", "reason"})
 )
 
 // ServiceHookHandler is an HTTP handler for service hooks
@@ -41,40 +47,66 @@ type ServiceHookHandler struct {
 func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	defer request.Body.Close()
 
-	timer := prometheus.NewTimer(serviceHookDurationHistogram)
-	defer timer.ObserveDuration()
-
+	// Assert HTTP method
 	if !strings.EqualFold(request.Method, "POST") {
 		logger.Errorf("Service hooks must be POST requests - received %s method", request.Method)
-		writer.WriteHeader(405)
+		serviceHookCounter.With(prometheus.Labels{"eventType": "unknown"}).Inc()
+		serviceHookErrorCounter.With(prometheus.Labels{"eventType": "unknown", "reason": fmt.Sprintf("HTTP %d Method Not Allowed", http.StatusMethodNotAllowed)}).Inc()
+		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
+	// Read body into string
 	buffer := new(bytes.Buffer)
 	_, err := buffer.ReadFrom(request.Body)
 	if err != nil {
 		logger.Errorf("Error reading request body from service hook: %s", err.Error())
-		writer.WriteHeader(500)
+		serviceHookCounter.With(prometheus.Labels{"eventType": "unknown"}).Inc()
+		serviceHookErrorCounter.With(prometheus.Labels{"eventType": "unknown", "reason": "Error reading body"}).Inc()
+		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	requestStr := string(buffer.Bytes())
+	if logger.LogDebug() {
+		logger.Debugf("Received service hook: %s", requestStr)
+	}
 
-	logger.Debugf("Received service hook: %s", requestStr)
-
+	// Parse JSON
 	requestObj := new(azuredevops.ServiceHook)
 	if err = json.NewDecoder(strings.NewReader(requestStr)).Decode(requestObj); err != nil {
-		logger.Errorf(`Error - could not parse JSON from Service hook. Error: %s
-		Request: %s`, err.Error(), requestStr)
-		writer.WriteHeader(400)
+		logger.Errorf("Error - could not parse JSON from Service hook. Error: %s\nRequest: %s", err.Error(), requestStr)
+		serviceHookCounter.With(prometheus.Labels{"eventType": "unknown"}).Inc()
+		serviceHookErrorCounter.With(prometheus.Labels{"eventType": "unknown", "reason": "JSON parse error"}).Inc()
+		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	logger.Debugf("Deserialized response to: %#v", requestObj)
 
-	// TODO handle basic authentication
+	// Prometheus metrics
+	serviceHookCounter.With(prometheus.Labels{"eventType": requestObj.EventType}).Inc()
+	defer prometheus.NewTimer(serviceHookDurationHistogram.With(prometheus.Labels{"eventType": requestObj.EventType})).ObserveDuration()
 
-	serviceHookCounter.Inc()
+	if logger.LogDebug() {
+		logger.Debugf("Deserialized response to: %#v", requestObj)
+	}
 
-	writer.WriteHeader(200)
+	// Validate basic authentication
+	username, password, ok := request.BasicAuth()
+	if h.args.ServiceHooks.UseBasicAuthentication() {
+		if ok && username == h.args.ServiceHooks.Username && password == h.args.ServiceHooks.Password {
+			if logger.LogDebug() {
+				logger.Debugf("Validated basic authentication for request \"%s\"", requestObj.Describe())
+			}
+		} else {
+			logger.Errorf("Failed to validate basic authentication for request \"%s\"")
+			serviceHookErrorCounter.With(prometheus.Labels{"eventType": requestObj.EventType, "reason": fmt.Sprintf("HTTP %d Unauthorized", http.StatusUnauthorized)}).Inc()
+			writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+	} else if ok {
+		logger.Infof("Basic authentication was provided in request \"%s\", but basic authentication was not configured.", requestObj.Describe())
+	}
+
+	writer.WriteHeader(http.StatusOK)
 	writer.Write([]byte("OK"))
 }
 

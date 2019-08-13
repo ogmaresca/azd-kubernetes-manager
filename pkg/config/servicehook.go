@@ -183,6 +183,10 @@ func (shf ServiceHookResourceFilters) Validate() ([]string, error) {
 
 // Matches determines if a rule should be applied for a Service Hook
 func (sh ServiceHook) Matches(serviceHook azuredevops.ServiceHook) (bool, error) {
+	if !contains(serviceHook.EventType, sh.Event.GetEventTypes()) {
+		return false, nil
+	}
+
 	status := serviceHook.GetStatus()
 	if status != nil && !contains(*status, sh.ResourceFilters.Statuses) {
 		return false, nil

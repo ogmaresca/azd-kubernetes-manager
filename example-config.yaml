@@ -4,8 +4,15 @@ serviceHooks:
     statuses:
     - completed
     - abandoned
-    environments:
-    - PR
+    reasons: []
+    projects: []
+    repositories: []
+    sourceRefs:
+    - refs/heads/feature/*
+    targetRefs:
+    - refs/heads/master
+    templates:
+    - '{{ contains (.CreatedBy.DisplayName | title) "Obama" }}'
   rules:
     delete:
     - apiVersion: v1
@@ -19,10 +26,12 @@ serviceHooks:
           values: []
 - event: build.complete
   resourceFilters:
+    statuses: []
     reasons:
     - manual
-    environments:
-    - PR
+    projects: []
+    templates:
+    - '{{ eq .Definition.DefinitionType "yaml" }}'
   rules:
     delete:
     - apiVersion: v1
