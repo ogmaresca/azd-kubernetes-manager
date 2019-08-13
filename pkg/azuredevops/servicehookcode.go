@@ -16,7 +16,6 @@ type ServiceHookResourceCodeCheckedIn struct {
 
 // ServiceHookResourceCodePushed holds fields related to the Service Hook resource for the git.push event
 type ServiceHookResourceCodePushed struct {
-	Commits    []GitCommit    `json:"commits"`
 	RefUpdates []GitRefUpdate `json:"refUpdates"`
 	PushedBy   *User          `json:"pushedBy"`
 	PushID     *int           `json:"pushId"`

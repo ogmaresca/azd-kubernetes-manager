@@ -12,7 +12,7 @@ serviceHooks:
     targetRefs:
     - refs/heads/master
     templates:
-    - '{{ contains (.CreatedBy.DisplayName | title) "Obama" }}'
+    - '{{ .CreatedBy.DisplayName | title | contains "Obama" }}'
   rules:
     delete:
     - apiVersion: v1

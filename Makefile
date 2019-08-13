@@ -8,7 +8,19 @@ go-run:
 	../bin/azd-kubernetes-manager --token=${AZURE_DEVOPS_TOKEN} --url=${AZURE_DEVOPS_URL} --config-file example-config.yaml --log=debug
 
 go-test:
-	go test github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops
+	go clean -testcache && go test -cover ./...
+
+go-test-azuredevops:
+	go clean -testcache && go test -cover -test.v ./pkg/azuredevops -args --log=debug
+
+go-test-config:
+	go clean -testcache && go test -cover -test.v ./pkg/config -args --log=debug
+
+go-test-kubernetes:
+	go clean -testcache && go test -cover -test.v ./pkg/kubernetes -args --log=debug
+
+go-test-processors:
+	go clean -testcache && go test -cover -test.v ./pkg/processors -args --log=debug
 
 docker-build:
 	docker build -t azd-kubernetes-manager:dev .

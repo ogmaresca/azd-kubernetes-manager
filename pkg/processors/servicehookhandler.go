@@ -39,7 +39,7 @@ var (
 
 // ServiceHookHandler is an HTTP handler for service hooks
 type ServiceHookHandler struct {
-	args      args.Args
+	args      args.ServiceHookArgs
 	config    config.File
 	k8sClient kubernetes.ClientAsync
 }
@@ -91,8 +91,8 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 
 	// Validate basic authentication
 	username, password, ok := request.BasicAuth()
-	if h.args.ServiceHooks.UseBasicAuthentication() {
-		if ok && username == h.args.ServiceHooks.Username && password == h.args.ServiceHooks.Password {
+	if h.args.UseBasicAuthentication() {
+		if ok && username == h.args.Username && password == h.args.Password {
 			if logger.LogDebug() {
 				logger.Debugf("Validated basic authentication for request \"%s\"", requestObj.Describe())
 			}
@@ -111,7 +111,7 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 }
 
 // NewServiceHookHandler creates a an HTTP handler for Service Hooks
-func NewServiceHookHandler(args args.Args, config config.File, k8sClient kubernetes.ClientAsync) ServiceHookHandler {
+func NewServiceHookHandler(args args.ServiceHookArgs, config config.File, k8sClient kubernetes.ClientAsync) ServiceHookHandler {
 	return ServiceHookHandler{
 		args:      args,
 		config:    config,

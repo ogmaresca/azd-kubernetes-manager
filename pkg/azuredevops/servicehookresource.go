@@ -45,6 +45,7 @@ type ServiceHookResource struct {
 	Environment *Environment   `json:"environment"` // Event types: Release Deployments
 	Project     *StrDefinition `json:"project"`     // Event types: Releases, Release Deployment Approvals, Release Deployments
 	Repository  *GitRepository `json:"repository"`  // Event types: git.push, Pull Requests
+	Commits     []GitCommit    `json:"commits"`     // Event types: git.push, Pull Requests
 }
 
 // ServiceHookResourceContainers contains the value of the resourceContainers field
