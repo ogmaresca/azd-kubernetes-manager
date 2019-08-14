@@ -7,8 +7,10 @@ import (
 
 // ServiceHookResourceWorkItems holds fields related to the Service Hook resource for Work Item events
 type ServiceHookResourceWorkItems struct {
-	Rev    *int              `json:"rev"`
-	Fields map[string]string `json:"fields"`
+	Rev *int `json:"rev"`
+	// workitem.updated is a map[string]struct{oldValue string, newValue string}
+	// Every other work item is a map[string]string
+	//Fields map[string]string `json:"fields"`
 }
 
 // ServiceHookResourceWorkItemsUpdated holds fields related to the Service Hook resource for the workitem.updated
@@ -21,7 +23,9 @@ type ServiceHookResourceWorkItemsUpdated struct {
 
 // ServiceHookResourceWorkItemsUpdatedRevision holds revision info for a Work Item
 type ServiceHookResourceWorkItemsUpdatedRevision struct {
-	ServiceHookResourceWorkItems
-	ID  int     `json:"id"`
-	URL url.URL `json:"url"`
+	//ServiceHookResourceWorkItems
+	Rev    *int              `json:"rev"`
+	Fields map[string]string `json:"fields"`
+	ID     int               `json:"id"`
+	URL    url.URL           `json:"url"`
 }

@@ -21,7 +21,7 @@ func TestMatches(t *testing.T) {
 			},
 		}
 
-		hook := azuredevops.ServiceHook{
+		hook := &azuredevops.ServiceHook{
 			EventType: string(config.Event),
 			Resource: azuredevops.ServiceHookResource{
 				ServiceHookResourcePullRequest: azuredevops.ServiceHookResourcePullRequest{
@@ -51,10 +51,16 @@ func TestMatches(t *testing.T) {
 					},
 				},
 				Commits: []azuredevops.GitCommit{
-					azuredevops.GitCommit{CommitID: "MockCommitId1", URL: forceParseURL("https://dev.azure.com/MockOrganization/MockProject/_apis/repos/git/repositories/MockRepositoryId/commits/MockCommitId1", t)},
-					azuredevops.GitCommit{CommitID: "MockCommitId2", URL: forceParseURL("https://dev.azure.com/MockOrganization/MockProject/_apis/repos/git/repositories/MockRepositoryId/commits/MockCommitId2", t)},
+					azuredevops.GitCommit{
+						CommitID: "SampleCommitId1",
+						URL:      forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId1", t),
+					},
+					azuredevops.GitCommit{
+						CommitID: "SampleCommitId2",
+						URL:      forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId2", t),
+					},
 				},
-				Status: strPtr("completed"),
+				Status: strPtr(string(azuredevops.StatusCompleted)),
 			},
 		}
 
@@ -74,7 +80,7 @@ func TestMatches(t *testing.T) {
 			},
 		}
 
-		hook := azuredevops.ServiceHook{
+		hook := &azuredevops.ServiceHook{
 			EventType: string(config.Event),
 			Resource: azuredevops.ServiceHookResource{
 				ServiceHookResourcePullRequest: azuredevops.ServiceHookResourcePullRequest{
@@ -104,10 +110,16 @@ func TestMatches(t *testing.T) {
 					},
 				},
 				Commits: []azuredevops.GitCommit{
-					azuredevops.GitCommit{CommitID: "MockCommitId1", URL: forceParseURL("https://dev.azure.com/MockOrganization/MockProject/_apis/repos/git/repositories/MockRepositoryId/commits/MockCommitId1", t)},
-					azuredevops.GitCommit{CommitID: "MockCommitId2", URL: forceParseURL("https://dev.azure.com/MockOrganization/MockProject/_apis/repos/git/repositories/MockRepositoryId/commits/MockCommitId2", t)},
+					azuredevops.GitCommit{
+						CommitID: "SampleCommitId1",
+						URL:      forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId1", t),
+					},
+					azuredevops.GitCommit{
+						CommitID: "SampleCommitId2",
+						URL:      forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId2", t),
+					},
 				},
-				Status: strPtr("completed"),
+				Status: strPtr(string(azuredevops.StatusCompleted)),
 			},
 		}
 
@@ -127,7 +139,7 @@ func TestMatches(t *testing.T) {
 			},
 		}
 
-		hook := azuredevops.ServiceHook{
+		hook := &azuredevops.ServiceHook{
 			EventType: string(config.Event),
 			Resource: azuredevops.ServiceHookResource{
 				ServiceHookResourcePullRequest: azuredevops.ServiceHookResourcePullRequest{
@@ -157,10 +169,16 @@ func TestMatches(t *testing.T) {
 					},
 				},
 				Commits: []azuredevops.GitCommit{
-					azuredevops.GitCommit{CommitID: "MockCommitId1", URL: forceParseURL("https://dev.azure.com/MockOrganization/MockProject/_apis/repos/git/repositories/MockRepositoryId/commits/MockCommitId1", t)},
-					azuredevops.GitCommit{CommitID: "MockCommitId2", URL: forceParseURL("https://dev.azure.com/MockOrganization/MockProject/_apis/repos/git/repositories/MockRepositoryId/commits/MockCommitId2", t)},
+					azuredevops.GitCommit{
+						CommitID: "SampleCommitId1",
+						URL:      forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId1", t),
+					},
+					azuredevops.GitCommit{
+						CommitID: "SampleCommitId2",
+						URL:      forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId2", t),
+					},
 				},
-				Status: strPtr("completed"),
+				Status: strPtr(string(azuredevops.StatusCompleted)),
 			},
 		}
 

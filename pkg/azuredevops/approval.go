@@ -38,9 +38,9 @@ type ApprovalStatus string
 
 const (
 	// ApprovalStatusApproved is for resources that have been approved
-	ApprovalStatusApproved Status = "approved"
+	ApprovalStatusApproved ApprovalStatus = "approved"
 	// ApprovalStatusRejected is for resources that have been rejected
-	ApprovalStatusRejected Status = "rejected"
+	ApprovalStatusRejected ApprovalStatus = "rejected"
 	// ApprovalStatusPending is for resources that are currently pending
-	ApprovalStatusPending Status = "pending"
+	ApprovalStatusPending ApprovalStatus = "pending"
 )

@@ -63,5 +63,5 @@ type ServiceHookResourceContainer struct {
 // ServiceHookResourceDefinition holds a basic resource definition for Service Hooks
 type ServiceHookResourceDefinition struct {
 	IntDefinition
-	URL string `json:"url"`
+	URL url.URL `json:"url"`
 }

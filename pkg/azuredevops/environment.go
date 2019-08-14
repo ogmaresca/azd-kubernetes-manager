@@ -5,7 +5,7 @@ import "time"
 // Environment holds the environment of a Release
 type Environment struct {
 	IntDefinition
-	ReleaseID               int                        `json:"releaseId"`
+	ReleaseID               int                           `json:"releaseId"`
 	Status                  string                        `json:"status"`
 	Variables               map[string]string             `json:"variables"`
 	PreDeployApprovals      []User                        `json:"preDeployApprovals"`
@@ -13,9 +13,9 @@ type Environment struct {
 	PreApprovalsSnapshot    []EnvironmentApprovalSnapshot `json:"preApprovalsSnapshot"`
 	PostApprovalsSnapshot   []EnvironmentApprovalSnapshot `json:"postApprovalsSnapshot"`
 	DeploySteps             []interface{}                 `json:"deploySteps"`
-	Rank                    int                        `json:"rank"`
-	DefinitionEnvironmentID int                        `json:"definitionEnvironmentId"`
-	QueueID                 int                        `json:"queueId"`
+	Rank                    int                           `json:"rank"`
+	DefinitionEnvironmentID int                           `json:"definitionEnvironmentId"`
+	QueueID                 int                           `json:"queueId"`
 	EnvironmentOptions      map[string]string             `json:"environmentOptions"`
 	Demands                 []interface{}                 `json:"demands"`
 	Conditions              []interface{}                 `json:"conditions"`

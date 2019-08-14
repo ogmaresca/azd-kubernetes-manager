@@ -1,11 +1,14 @@
 package azuredevops
 
-import "time"
+import (
+	"net/url"
+	"time"
+)
 
 // Release holds a Release definition
 type Release struct {
 	IntDefinition
-	ReleaseID                  int                        `json:"releaseId"`
+	ReleaseID                  int                           `json:"releaseId"`
 	Status                     string                        `json:"status"`
 	CreatedOn                  time.Time                     `json:"createdOn"`
 	ModifiedOn                 time.Time                     `json:"modifiedOn"`
@@ -19,9 +22,9 @@ type Release struct {
 	Reason                     string                        `json:"reason"`
 	ReleaseNameFormat          string                        `json:"releaseNameFormat"`
 	KeepForever                bool                          `json:"keepForever"`
-	DefinitionSnapshotRevision int                        `json:"definitionSnapshotRevision"`
+	DefinitionSnapshotRevision int                           `json:"definitionSnapshotRevision"`
 	Comment                    string                        `json:"comment"`
-	LogsContainerURL           *string                       `json:"logsContainerUrl"`
+	LogsContainerURL           *url.URL                      `json:"logsContainerUrl"`
 }
 
 // ReleaseArtifact holds an artifact of a Release

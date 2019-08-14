@@ -80,7 +80,7 @@ func (sh ServiceHook) Describe() string {
 }
 
 // Describe returns a user-friendly representation of a ServiceHook
-func (shf ServiceHookResourceFilters) Describe() string {
+func (shrf ServiceHookResourceFilters) Describe() string {
 	return fmt.Sprintf(
 		strings.Join([]string{
 			"Statuses: %v",
@@ -94,16 +94,16 @@ func (shf ServiceHookResourceFilters) Describe() string {
 			"Target Branch Refs: %v",
 			"Templates: %s",
 		}, "\n"),
-		shf.Statuses,
-		shf.Reasons,
-		shf.Projects,
-		shf.Releases,
-		shf.Environments,
-		shf.ApprovalTypes,
-		shf.Repositories,
-		shf.SourceRefs,
-		shf.TargetRefs,
-		joinYAMLSlice(shf.Templates),
+		shrf.Statuses,
+		shrf.Reasons,
+		shrf.Projects,
+		shrf.Releases,
+		shrf.Environments,
+		shrf.ApprovalTypes,
+		shrf.Repositories,
+		shrf.SourceRefs,
+		shrf.TargetRefs,
+		joinYAMLSlice(shrf.Templates),
 	)
 }
 
@@ -144,28 +144,34 @@ func (sh ServiceHook) Validate() ([]string, error) {
 }
 
 // Validate a Service Hook filters definition. This function returns a slice of warnings and an error.
-func (shf ServiceHookResourceFilters) Validate() ([]string, error) {
+func (shrf ServiceHookResourceFilters) Validate() ([]string, error) {
 	var errors []string
 
-	gotplRegex, _ := regexp.Compile(".*{{.*}}.*")
-
-	for pos, ref := range shf.SourceRefs {
+	for pos, ref := range shrf.SourceRefs {
 		_, err := regexp.CompilePOSIX(ref)
 		if err != nil {
 			errors = append(errors, fmt.Sprintf("Error with `SourceRefs` %d: invalid POSIX ERE pattern.", pos))
 		}
 	}
 
-	for pos, ref := range shf.TargetRefs {
+	for pos, ref := range shrf.TargetRefs {
 		_, err := regexp.CompilePOSIX(ref)
 		if err != nil {
 			errors = append(errors, fmt.Sprintf("Error with `TargetRefs` %d: invalid POSIX ERE pattern.", pos))
 		}
 	}
 
-	for pos, templateFilter := range shf.Templates {
+	gotplRegex, _ := regexp.Compile(".*{{.*}}.*")
+	for pos, templateFilter := range shrf.Templates {
 		if !gotplRegex.Match([]byte(templateFilter)) {
 			errors = append(errors, fmt.Sprintf("Error with template filter %d: invalid templating. Please see https://golang.org/pkg/text/template/.", pos))
+		}
+	}
+
+	for i := 0; i < len(shrf.Templates); i++ {
+		_, err := shrf.Template(i, &sampleServiceHook)
+		if err != nil {
+			errors = append(errors, fmt.Sprintf("Error running sample Service Hook on template resource filter %d: %s", i, err.Error()))
 		}
 	}
 
@@ -182,7 +188,11 @@ func (shf ServiceHookResourceFilters) Validate() ([]string, error) {
 ///
 
 // Matches determines if a rule should be applied for a Service Hook
-func (sh ServiceHook) Matches(serviceHook azuredevops.ServiceHook) (bool, error) {
+func (sh ServiceHook) Matches(serviceHook *azuredevops.ServiceHook) (bool, error) {
+	if serviceHook == nil {
+		return false, nil
+	}
+
 	if !contains(serviceHook.EventType, sh.Event.GetEventTypes()) {
 		return false, nil
 	}
@@ -243,32 +253,43 @@ func (sh ServiceHook) Matches(serviceHook azuredevops.ServiceHook) (bool, error)
 		}
 	}
 
-	if len(sh.ResourceFilters.Templates) > 0 {
-		for pos, filter := range sh.ResourceFilters.Templates {
-			template, err := baseTemplate.Clone()
-			if err != nil {
-				return false, err
-			}
-			template, err = template.Parse(filter)
-			if err != nil {
-				return false, fmt.Errorf("Error parsing Service Hook template filter %d: %s", pos, err.Error())
-			}
-			buffer := new(bytes.Buffer)
-			err = template.Execute(buffer, serviceHook.Resource)
-			if err != nil {
-				return false, fmt.Errorf("Error executing Service Hook template filter %d: %s", pos, err.Error())
-			}
-			templatedValue := buffer.String()
-			if logger.LogDebug() {
-				logger.Debugf("Converted Service Hook filter template %d:\n  %s\nto:\n  %s", pos, strings.ReplaceAll(filter, "\n", "\n  "), strings.ReplaceAll(templatedValue, "\n", "\n  "))
-			}
-			if !strings.EqualFold("true", templatedValue) {
-				return false, nil
-			}
+	for i := 0; i < len(sh.ResourceFilters.Templates); i++ {
+		templatedValue, err := sh.ResourceFilters.Template(i, serviceHook)
+		if err != nil {
+			return false, err
+		}
+		if !strings.EqualFold(strings.TrimSpace("true"), templatedValue) {
+			return false, nil
 		}
 	}
 
 	return true, nil
+}
+
+// Template runs Go templating for a specific template filter
+func (shrf ServiceHookResourceFilters) Template(pos int, serviceHook *azuredevops.ServiceHook) (string, error) {
+	if len(shrf.Templates) <= pos {
+		return "", fmt.Errorf("Out of Bounds error: Can't execute template filter %d, there are %d templates defined", pos, len(shrf.Templates))
+	}
+	template, err := baseTemplate.Clone()
+	if err != nil {
+		return "", err
+	}
+	filter := shrf.Templates[pos]
+	template, err = template.Parse(filter)
+	if err != nil {
+		return "", fmt.Errorf("Error parsing Service Hook template filter %d: %s", pos, err.Error())
+	}
+	buffer := new(bytes.Buffer)
+	err = template.Execute(buffer, serviceHook.Resource)
+	if err != nil {
+		return "", fmt.Errorf("Error executing Service Hook template filter %d: %s", pos, err.Error())
+	}
+	templatedValue := buffer.String()
+	if logger.LogDebug() {
+		logger.Debugf("Converted Service Hook filter template %d:\n  %s\nto:\n  %s", pos, strings.ReplaceAll(filter, "\n", "\n  "), strings.ReplaceAll(templatedValue, "\n", "\n  "))
+	}
+	return templatedValue, nil
 }
 
 // ServiceHookEventType represents all possible Event Type values for a Service Hook configuration

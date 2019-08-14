@@ -40,7 +40,7 @@ var (
 // ServiceHookHandler is an HTTP handler for service hooks
 type ServiceHookHandler struct {
 	args      args.ServiceHookArgs
-	config    config.File
+	config    []config.ServiceHook
 	k8sClient kubernetes.ClientAsync
 }
 
@@ -106,12 +106,31 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 		logger.Infof("Basic authentication was provided in request \"%s\", but basic authentication was not configured.", requestObj.Describe())
 	}
 
+	for pos, config := range h.config {
+		matches, err := config.Matches(requestObj)
+		if err != nil {
+			logger.Errorf("Error determining if Service Hook configuration %d matches request \"%s\"", pos, requestObj.Describe())
+			serviceHookErrorCounter.With(prometheus.Labels{"eventType": requestObj.EventType, "reason": "Error matching configuration"}).Inc()
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if matches {
+			logger.Infof("Processing Service Hook configuration %d for request %s", pos, requestObj.Describe())
+
+			// TODO process rules
+
+			if !config.Continue {
+				break
+			}
+		}
+	}
+
 	writer.WriteHeader(http.StatusOK)
 	writer.Write([]byte("OK"))
 }
 
 // NewServiceHookHandler creates a an HTTP handler for Service Hooks
-func NewServiceHookHandler(args args.ServiceHookArgs, config config.File, k8sClient kubernetes.ClientAsync) ServiceHookHandler {
+func NewServiceHookHandler(args args.ServiceHookArgs, config []config.ServiceHook, k8sClient kubernetes.ClientAsync) ServiceHookHandler {
 	return ServiceHookHandler{
 		args:      args,
 		config:    config,
