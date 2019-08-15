@@ -1,23 +1,34 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
+
+	"gopkg.in/yaml.v2"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Rules lists all of the rules to perform upon an event
 type Rules struct {
+	// The resources to apply
+	Apply []ApplyResourceRule `yaml:"apply"`
+
 	// The resources to delete
 	Delete []DeleteResourceRule `yaml:"delete"`
 }
 
-// DeleteResourceRule lists all of the resources to delete
+// DeleteResourceRule lists a resource to delete
 type DeleteResourceRule struct {
 	// The Kubernetes API version of the resource(s) to delete
 	APIVersion string `yaml:"apiVersion"`
 
 	// The resource kind
 	Kind string `yaml:"kind"`
+
+	// The resource namespace
+	Namespace *string `yaml:"namespace"`
 
 	// The label selector
 	Selector LabelSelector `yaml:"selector"`
@@ -26,13 +37,24 @@ type DeleteResourceRule struct {
 	Limit *int `yaml:"limit"`
 }
 
+// ApplyResourceRule lists a resource to create
+type ApplyResourceRule string
+
 ///
 /// Describe()
 ///
 
 // Describe returns a user-friendly representation of a Rules
 func (r Rules) Describe() string {
-	description := "Resource deletion rules:"
+	description := "Resource apply rules:"
+
+	var applyRuleDescriptions []string
+	for _, applyRule := range r.Delete {
+		applyRuleDescriptions = append(applyRuleDescriptions, applyRule.Describe())
+	}
+	description += joinYAMLSlice(applyRuleDescriptions)
+
+	description += "\nResource deletion rules:"
 
 	var deletionRuleDescriptions []string
 	for _, deletionRule := range r.Delete {
@@ -51,22 +73,64 @@ func (r DeleteResourceRule) Describe() string {
 	)
 }
 
+// Describe returns a user-friendly representation of a ApplyResourceRule
+func (r ApplyResourceRule) Describe() string {
+	resource, err := r.Parse()
+	if err != nil {
+		return fmt.Sprintf("Error parsing Kubernetes resource: %s", err.Error())
+	}
+
+	name := resource.Metadata.Name
+	if name == "" {
+		name = resource.Metadata.GenerateName
+	}
+
+	return fmt.Sprintf(
+		"%s %s/%s",
+		resource.APIVersion, resource.Kind, name,
+	)
+}
+
 ///
 /// Validate
 ///
 
 // Validate a Rules definition. This function returns a slice of warnings and an error.
 func (r Rules) Validate() ([]string, error) {
-	if len(r.Delete) == 0 {
+	if len(r.Apply) == 0 && len(r.Delete) == 0 {
 		return []string{"No rules were defined"}, nil
 	}
 
-	var fileSections []FileSection
-	for _, value := range r.Delete {
-		fileSections = append(fileSections, value)
+	var warnings, errors []string
+
+	var applyFileSections []FileSection
+	for _, value := range r.Apply {
+		applyFileSections = append(applyFileSections, value)
 	}
 
-	return validate(fileSections, "Delete Resource rule definition")
+	applyWarnings, applyErr := validate(applyFileSections, "Apply Resource rule definition")
+	warnings = append(warnings, applyWarnings...)
+	if applyErr != nil {
+		errors = append(errors, applyErr.Error())
+	}
+
+	var deleteFileSections []FileSection
+	for _, value := range r.Delete {
+		deleteFileSections = append(deleteFileSections, value)
+	}
+
+	deleteWarnings, deleteErr := validate(deleteFileSections, "Delete Resource rule definition")
+	warnings = append(warnings, deleteWarnings...)
+	if deleteErr != nil {
+		errors = append(errors, deleteErr.Error())
+	}
+
+	var err error
+	if len(errors) > 0 {
+		err = fmt.Errorf("%s", strings.Join(errors, "\n"))
+	}
+
+	return warnings, err
 }
 
 // Validate a Delete Kubernetes Resouce rule definition. This function returns a slice of warnings and an error.
@@ -103,4 +167,49 @@ func (r DeleteResourceRule) Validate() ([]string, error) {
 	}
 
 	return warnings, err
+}
+
+// Validate a Delete Kubernetes Resouce rule definition. This function returns a slice of warnings and an error.
+func (r ApplyResourceRule) Validate() ([]string, error) {
+	if string(r) == "" {
+		return []string{}, fmt.Errorf("%s", "Value must not be empty.")
+	}
+
+	template, err := baseTemplate.Clone()
+	if err != nil {
+		return []string{}, err
+	}
+	template, err = template.Parse(string(r))
+	if err != nil {
+		return []string{}, fmt.Errorf("Error parsing Apply rule: %s", err.Error())
+	}
+	buffer := new(bytes.Buffer)
+	err = template.Execute(buffer, sampleTemplatingArgs)
+	if err != nil {
+		return []string{}, fmt.Errorf("Error executing Apply rule with sample data: %s", err.Error())
+	}
+	templatedValue := buffer.String()
+	if logger.LogDebug() {
+		logger.Debugf("Converted Apply rule template:\n  %s\nto:\n  %s", strings.ReplaceAll(string(r), "\n", "\n  "), strings.ReplaceAll(templatedValue, "\n", "\n  "))
+	}
+
+	return []string{}, nil
+}
+
+//
+// Mappings
+//
+
+// ToTypeMeta maps a DeleteResourceRule to a Kubernetes meta/v1 TypeMeta
+func (r DeleteResourceRule) ToTypeMeta() metav1.TypeMeta {
+	return metav1.TypeMeta{Kind: r.Kind, APIVersion: r.APIVersion}
+}
+
+// Parse parses the rule as a YAML object
+func (r ApplyResourceRule) Parse() (KubernetesResource, error) {
+	resource := KubernetesResource{}
+
+	err := yaml.Unmarshal([]byte(string(r)), &resource)
+
+	return resource, err
 }

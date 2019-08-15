@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
+	"github.com/ggmaresca/azd-kubernetes-manager/pkg/templating"
 )
 
 var (
@@ -310,4 +311,6 @@ var (
 			},
 		}
 	}()
+
+	sampleTemplatingArgs = templating.NewArgsFromServiceHook(sampleServiceHook)
 )

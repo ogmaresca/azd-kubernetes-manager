@@ -2,6 +2,28 @@ serviceHooks:
 - event: git.pullrequest.updated
   resourceFilters:
     statuses:
+    - active
+    reasons: []
+    projects: []
+    repositories: []
+    sourceRefs:
+    - refs/heads/feature/*
+    targetRefs:
+    - refs/heads/master
+    templates:
+    - '{{ .CreatedBy.DisplayName | title | contains "Obama" }}'
+  rules:
+    apply:
+    - |
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: pr-{{ .PullRequestID }}
+        labels:
+          azdPullRequestId: '{{ .PullRequestID }}'
+- event: git.pullrequest.updated
+  resourceFilters:
+    statuses:
     - completed
     - abandoned
     reasons: []
@@ -19,7 +41,7 @@ serviceHooks:
       kind: Namespace
       selector:
         matchLabels:
-          azdPullRequestId: '{{ .PullRequestId }}'
+          azdPullRequestId: '{{ .PullRequestID }}'
         matchExpressions:
         - key: azdPreserve
           operator: DoesNotExist
@@ -38,7 +60,7 @@ serviceHooks:
       kind: Namespace
       selector:
         matchLabels:
-          azdBuildId: '{{ .BuildId }}'
+          azdBuildId: '{{ .BuildID }}'
         matchExpressions:
         - key: azdPreserve
           operator: DoesNotExist
