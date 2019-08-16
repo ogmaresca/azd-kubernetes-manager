@@ -1,7 +1,6 @@
 package config
 
 import (
-	"bytes"
 	"fmt"
 	"regexp"
 	"strings"
@@ -145,6 +144,7 @@ func (sh ServiceHook) Validate() ([]string, error) {
 
 // Validate a Service Hook filters definition. This function returns a slice of warnings and an error.
 func (shrf ServiceHookResourceFilters) Validate() ([]string, error) {
+	var warnings []string
 	var errors []string
 
 	for pos, ref := range shrf.SourceRefs {
@@ -161,17 +161,21 @@ func (shrf ServiceHookResourceFilters) Validate() ([]string, error) {
 		}
 	}
 
-	gotplRegex, _ := regexp.Compile(".*{{.*}}.*")
-	for pos, templateFilter := range shrf.Templates {
-		if !gotplRegex.Match([]byte(templateFilter)) {
-			errors = append(errors, fmt.Sprintf("Error with template filter %d: invalid templating. Please see https://golang.org/pkg/text/template/.", pos))
-		}
-	}
-
-	for i := 0; i < len(shrf.Templates); i++ {
-		_, err := shrf.Template(i, &sampleServiceHook)
+	for pos, filter := range shrf.Templates {
+		templatedFilter, err := templating.Execute("ConfigFileValidation", filter, sampleServiceHook)
 		if err != nil {
-			errors = append(errors, fmt.Sprintf("Error running sample Service Hook on template resource filter %d: %s", i, err.Error()))
+			errors = append(errors, fmt.Sprintf("Template filter %d error: %s", pos, err.Error()))
+		} else if templatedFilter != filter {
+			if logger.LogDebug() {
+				logger.Debugf("Converted template filter %d:\n  %s\nto:\n  %s", pos, strings.ReplaceAll(filter, "\n", "\n  "), strings.ReplaceAll(templatedFilter, "\n", "\n  "))
+			}
+
+			trimmedTemplatedFilter := strings.TrimSpace(templatedFilter)
+			if !strings.EqualFold(trimmedTemplatedFilter, "true") && !strings.EqualFold(trimmedTemplatedFilter, "false") {
+				warnings = append(warnings, fmt.Sprintf("The template filter %d did not return a boolean value.", pos))
+			}
+		} else {
+			errors = append(errors, fmt.Sprintf("Template filter %d does not have any Go templating", pos))
 		}
 	}
 
@@ -180,7 +184,7 @@ func (shrf ServiceHookResourceFilters) Validate() ([]string, error) {
 		err = fmt.Errorf("%s", joinYAMLSlice(errors))
 	}
 
-	return []string{}, err
+	return warnings, err
 }
 
 ///
@@ -253,43 +257,17 @@ func (sh ServiceHook) Matches(serviceHook *azuredevops.ServiceHook) (bool, error
 		}
 	}
 
-	for i := 0; i < len(sh.ResourceFilters.Templates); i++ {
-		templatedValue, err := sh.ResourceFilters.Template(i, serviceHook)
+	for pos, filter := range sh.ResourceFilters.Templates {
+		templatedFilter, err := templating.Execute("ServiceHook", filter, *serviceHook)
 		if err != nil {
-			return false, err
+			return false, fmt.Errorf("Error running template filter %d: %s", pos, err.Error())
 		}
-		if !strings.EqualFold(strings.TrimSpace("true"), templatedValue) {
+		if !strings.EqualFold(strings.TrimSpace("true"), templatedFilter) {
 			return false, nil
 		}
 	}
 
 	return true, nil
-}
-
-// Template runs Go templating for a specific template filter
-func (shrf ServiceHookResourceFilters) Template(pos int, serviceHook *azuredevops.ServiceHook) (string, error) {
-	if len(shrf.Templates) <= pos {
-		return "", fmt.Errorf("Out of Bounds error: Can't execute template filter %d, there are %d templates defined", pos, len(shrf.Templates))
-	}
-	template, err := baseTemplate.Clone()
-	if err != nil {
-		return "", err
-	}
-	filter := shrf.Templates[pos]
-	template, err = template.Parse(filter)
-	if err != nil {
-		return "", fmt.Errorf("Error parsing Service Hook template filter %d: %s", pos, err.Error())
-	}
-	buffer := new(bytes.Buffer)
-	err = template.Execute(buffer, serviceHook.Resource)
-	if err != nil {
-		return "", fmt.Errorf("Error executing Service Hook template filter %d: %s", pos, err.Error())
-	}
-	templatedValue := buffer.String()
-	if logger.LogDebug() {
-		logger.Debugf("Converted Service Hook filter template %d:\n  %s\nto:\n  %s", pos, strings.ReplaceAll(filter, "\n", "\n  "), strings.ReplaceAll(templatedValue, "\n", "\n  "))
-	}
-	return templatedValue, nil
 }
 
 // ServiceHookEventType represents all possible Event Type values for a Service Hook configuration

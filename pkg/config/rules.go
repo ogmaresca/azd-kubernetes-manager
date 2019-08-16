@@ -1,10 +1,10 @@
 package config
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
+	"github.com/ggmaresca/azd-kubernetes-manager/pkg/templating"
 	"gopkg.in/yaml.v2"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,6 +18,9 @@ type Rules struct {
 	// The resources to delete
 	Delete []DeleteResourceRule `yaml:"delete"`
 }
+
+// ApplyResourceRule lists a resource to create
+type ApplyResourceRule string
 
 // DeleteResourceRule lists a resource to delete
 type DeleteResourceRule struct {
@@ -36,9 +39,6 @@ type DeleteResourceRule struct {
 	// The maximum resources to delete. If the number of returned resources is < limit, then fail
 	Limit *int `yaml:"limit"`
 }
-
-// ApplyResourceRule lists a resource to create
-type ApplyResourceRule string
 
 ///
 /// Describe()
@@ -65,14 +65,6 @@ func (r Rules) Describe() string {
 	return description
 }
 
-// Describe returns a user-friendly representation of a DeleteResourceRule
-func (r DeleteResourceRule) Describe() string {
-	return fmt.Sprintf(
-		"API Version: %s\nKinds: %s\nLimit: %d\nLabel Selector:\n  %s",
-		r.APIVersion, r.Kind, r.Limit, strings.ReplaceAll(r.Selector.Describe(), "\n", "\n  "),
-	)
-}
-
 // Describe returns a user-friendly representation of a ApplyResourceRule
 func (r ApplyResourceRule) Describe() string {
 	resource, err := r.Parse()
@@ -88,6 +80,14 @@ func (r ApplyResourceRule) Describe() string {
 	return fmt.Sprintf(
 		"%s %s/%s",
 		resource.APIVersion, resource.Kind, name,
+	)
+}
+
+// Describe returns a user-friendly representation of a DeleteResourceRule
+func (r DeleteResourceRule) Describe() string {
+	return fmt.Sprintf(
+		"API Version: %s\nKinds: %s\nLimit: %d\nLabel Selector:\n  %s",
+		r.APIVersion, r.Kind, r.Limit, strings.ReplaceAll(r.Selector.Describe(), "\n", "\n  "),
 	)
 }
 
@@ -134,6 +134,30 @@ func (r Rules) Validate() ([]string, error) {
 }
 
 // Validate a Delete Kubernetes Resouce rule definition. This function returns a slice of warnings and an error.
+func (r ApplyResourceRule) Validate() ([]string, error) {
+	if string(r) == "" {
+		return []string{}, fmt.Errorf("%s", "Apply rule must not be empty.")
+	}
+
+	strVal := r.String()
+	templatedValue, err := templating.Execute("ConfigFileValidation", strVal, sampleTemplatingArgs)
+	if err != nil {
+		return []string{}, fmt.Errorf("Apply rule error: %s", err.Error())
+	} else if logger.LogDebug() && templatedValue != strVal {
+		logger.Debugf("Converted Apply rule template:\n  %s\nto:\n  %s", strings.ReplaceAll(strVal, "\n", "\n  "), strings.ReplaceAll(templatedValue, "\n", "\n  "))
+	}
+
+	templatedRule := ApplyResourceRule(templatedValue)
+
+	_, err = templatedRule.Parse()
+	if err != nil {
+		return []string{}, fmt.Errorf("Error parsing Apply rule after templating: %s", err.Error())
+	}
+
+	return []string{}, nil
+}
+
+// Validate a Delete Kubernetes Resouce rule definition. This function returns a slice of warnings and an error.
 func (r DeleteResourceRule) Validate() ([]string, error) {
 	var errors []string
 	var warnings []string
@@ -146,16 +170,23 @@ func (r DeleteResourceRule) Validate() ([]string, error) {
 		errors = append(errors, "The Kubernetes resource `Kind` must be defined.")
 	}
 
+	if r.Namespace != nil && *r.Namespace == "" {
+		errors = append(errors, "The Kubernetes `Namespace` must not be empty if provided.")
+	} else if r.Namespace != nil {
+		templatedNamespace, err := templating.Execute("ConfigFileValidation", *r.Namespace, sampleTemplatingArgs)
+		if err != nil {
+			errors = append(errors, fmt.Sprintf("Delete rule namespace templating error: %s", err.Error()))
+		} else if logger.LogDebug() && templatedNamespace != *r.Namespace {
+			logger.Debugf("Converted Delete rule namespace template:\n  %s\nto:\n  %s", strings.ReplaceAll(*r.Namespace, "\n", "\n  "), strings.ReplaceAll(templatedNamespace, "\n", "\n  "))
+		}
+	}
+
 	selectorWarnings, err := r.Selector.Validate()
 	if len(selectorWarnings) > 0 {
 		warnings = append(warnings, selectorWarnings...)
 	}
 	if err != nil {
 		errors = append(errors, err.Error())
-	}
-
-	if len(r.Selector.MatchLabels) == 0 && len(r.Selector.MatchExpressions) == 0 {
-		errors = append(errors, "No label `Selector` was defined. See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ for defining set-based requirement selectors.")
 	}
 
 	if r.Limit != nil && *r.Limit <= 0 {
@@ -169,33 +200,6 @@ func (r DeleteResourceRule) Validate() ([]string, error) {
 	return warnings, err
 }
 
-// Validate a Delete Kubernetes Resouce rule definition. This function returns a slice of warnings and an error.
-func (r ApplyResourceRule) Validate() ([]string, error) {
-	if string(r) == "" {
-		return []string{}, fmt.Errorf("%s", "Value must not be empty.")
-	}
-
-	template, err := baseTemplate.Clone()
-	if err != nil {
-		return []string{}, err
-	}
-	template, err = template.Parse(string(r))
-	if err != nil {
-		return []string{}, fmt.Errorf("Error parsing Apply rule: %s", err.Error())
-	}
-	buffer := new(bytes.Buffer)
-	err = template.Execute(buffer, sampleTemplatingArgs)
-	if err != nil {
-		return []string{}, fmt.Errorf("Error executing Apply rule with sample data: %s", err.Error())
-	}
-	templatedValue := buffer.String()
-	if logger.LogDebug() {
-		logger.Debugf("Converted Apply rule template:\n  %s\nto:\n  %s", strings.ReplaceAll(string(r), "\n", "\n  "), strings.ReplaceAll(templatedValue, "\n", "\n  "))
-	}
-
-	return []string{}, nil
-}
-
 //
 // Mappings
 //
@@ -205,11 +209,30 @@ func (r DeleteResourceRule) ToTypeMeta() metav1.TypeMeta {
 	return metav1.TypeMeta{Kind: r.Kind, APIVersion: r.APIVersion}
 }
 
+// String returns the rule as a string
+func (r ApplyResourceRule) String() string {
+	return string(r)
+}
+
 // Parse parses the rule as a YAML object
 func (r ApplyResourceRule) Parse() (KubernetesResource, error) {
 	resource := KubernetesResource{}
 
-	err := yaml.Unmarshal([]byte(string(r)), &resource)
+	err := yaml.Unmarshal([]byte(r.String()), &resource)
+
+	return resource, err
+}
+
+// ParseTemplated templates the rule and then parses it as a YAML object
+func (r ApplyResourceRule) ParseTemplated(args templating.Args) (KubernetesResource, error) {
+	templatedRule, err := templating.Execute("ApplyResourceRule", r.String(), args)
+	if err != nil {
+		return KubernetesResource{}, err
+	}
+
+	resource := KubernetesResource{}
+
+	err = yaml.Unmarshal([]byte(templatedRule), &resource)
 
 	return resource, err
 }

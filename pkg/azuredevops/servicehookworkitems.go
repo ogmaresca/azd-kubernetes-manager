@@ -11,6 +11,7 @@ type ServiceHookResourceWorkItems struct {
 	// workitem.updated is a map[string]struct{oldValue string, newValue string}
 	// Every other work item is a map[string]string
 	//Fields map[string]string `json:"fields"`
+	Fields map[string]interface{} `json:"fields"`
 }
 
 // ServiceHookResourceWorkItemsUpdated holds fields related to the Service Hook resource for the workitem.updated

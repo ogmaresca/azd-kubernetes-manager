@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/ggmaresca/azd-kubernetes-manager/pkg/templating"
 )
 
 // LabelSelector represents a k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector, because it doesn't have YAML tags
@@ -73,12 +75,38 @@ func (ls LabelSelector) Validate() ([]string, error) {
 		return []string{}, fmt.Errorf("%s", "No label `Selector` was defined. See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ for defining set-based requirement selectors.")
 	}
 
+	var warnings, errors []string
+
+	for label, value := range ls.MatchLabels {
+		if value == "" {
+			errors = append(errors, fmt.Sprintf("Error with Match Label \"%s\" - empty values are not allowed. Add a matchExpression with an Exists operator instead.", label))
+		} else {
+			templatedValue, err := templating.Execute("ConfigFileValidation", value, sampleTemplatingArgs)
+			if err != nil {
+				errors = append(errors, fmt.Sprintf("Match Label \"%s\" error: %s", label, err.Error()))
+			} else if logger.LogDebug() && templatedValue != value {
+				logger.Debugf("Converted Match Label \"%s\" template:\n  %s\nto:\n  %s", label, strings.ReplaceAll(value, "\n", "\n  "), strings.ReplaceAll(templatedValue, "\n", "\n  "))
+			}
+		}
+	}
+
 	var fileSections []FileSection
 	for _, value := range ls.MatchExpressions {
 		fileSections = append(fileSections, value)
 	}
 
-	return validate(fileSections, "Label MatchExpressions")
+	matchExpressionWarnings, matchExpressionErrors := validate(fileSections, "Label MatchExpressions")
+	warnings = append(warnings, matchExpressionWarnings...)
+	if matchExpressionErrors != nil {
+		errors = append(errors, matchExpressionErrors.Error())
+	}
+
+	var err error
+	if len(errors) > 0 {
+		err = fmt.Errorf("%s", strings.Join(errors, "\n"))
+	}
+
+	return warnings, err
 }
 
 // Validate a LabelSelectorRequirement. This function returns a slice of warnings and an error.
@@ -103,6 +131,15 @@ func (lsr LabelSelectorRequirement) Validate() ([]string, error) {
 		case metav1.LabelSelectorOpNotIn:
 			if len(lsr.Values) == 0 {
 				errors = append(errors, fmt.Sprintf("The label expression `Operator` \"%s\" must define `Values`.", lsr.Operator))
+			} else {
+				for pos, value := range lsr.Values {
+					templatedValue, err := templating.Execute("ConfigFileValidation", value, sampleTemplatingArgs)
+					if err != nil {
+						errors = append(errors, fmt.Sprintf("Match Label Expression %d error: %s", pos, err.Error()))
+					} else if logger.LogDebug() && templatedValue != value {
+						logger.Debugf("Converted Match Label Expression %d template:\n  %s\nto:\n  %s", pos, strings.ReplaceAll(value, "\n", "\n  "), strings.ReplaceAll(templatedValue, "\n", "\n  "))
+					}
+				}
 			}
 		default:
 			errors = append(errors, fmt.Sprintf("Invalid label expression `Operator` \"%s\"", lsr.Operator))
@@ -134,6 +171,32 @@ func (ls LabelSelector) ToKubernetesLabelSelector() metav1.LabelSelector {
 	}
 }
 
+// ToTemplatedKubernetesLabelSelector templates a LabelSelector and then maps it to a k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector
+func (ls LabelSelector) ToTemplatedKubernetesLabelSelector(args templating.Args) (metav1.LabelSelector, error) {
+	var templatedMatchLabels map[string]string
+	for label, value := range ls.MatchLabels {
+		templatedValue, err := templating.Execute("LabelSelector", value, args)
+		if err != nil {
+			return metav1.LabelSelector{}, fmt.Errorf("Match Label \"%s\" templating error: %s", label, err.Error())
+		}
+		templatedMatchLabels[label] = templatedValue
+	}
+
+	var templatedLabelExpressions []metav1.LabelSelectorRequirement
+	for pos, expression := range ls.MatchExpressions {
+		templatedLabelExpression, err := expression.ToTemplatedKubernetesLabelSelectorRequirement(args)
+		if err != nil {
+			return metav1.LabelSelector{}, fmt.Errorf("Match Label Expression %d templating error: %s", pos, err.Error())
+		}
+		templatedLabelExpressions = append(templatedLabelExpressions, templatedLabelExpression)
+	}
+
+	return metav1.LabelSelector{
+		MatchLabels:      templatedMatchLabels,
+		MatchExpressions: templatedLabelExpressions,
+	}, nil
+}
+
 // ToKubernetesLabelSelectorRequirement maps a LabelSelectorRequirement to a k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelectorRequirement
 func (lsr LabelSelectorRequirement) ToKubernetesLabelSelectorRequirement() metav1.LabelSelectorRequirement {
 	return metav1.LabelSelectorRequirement{
@@ -141,4 +204,22 @@ func (lsr LabelSelectorRequirement) ToKubernetesLabelSelectorRequirement() metav
 		Operator: lsr.Operator,
 		Values:   lsr.Values,
 	}
+}
+
+// ToTemplatedKubernetesLabelSelectorRequirement templates a LabelSelectorRequirement and maps it to a k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelectorRequirement
+func (lsr LabelSelectorRequirement) ToTemplatedKubernetesLabelSelectorRequirement(args templating.Args) (metav1.LabelSelectorRequirement, error) {
+	var templatedValues []string
+	for pos, value := range lsr.Values {
+		templatedValue, err := templating.Execute("LabelSelectorRequirement", value, args)
+		if err != nil {
+			return metav1.LabelSelectorRequirement{}, fmt.Errorf("Match Label Expression %d templating error: %s", pos, err.Error())
+		}
+		templatedValues = append(templatedValues, templatedValue)
+	}
+
+	return metav1.LabelSelectorRequirement{
+		Key:      lsr.Key,
+		Operator: lsr.Operator,
+		Values:   templatedValues,
+	}, nil
 }
