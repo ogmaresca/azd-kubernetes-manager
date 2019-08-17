@@ -97,7 +97,7 @@ func (r DeleteResourceRule) Describe() string {
 
 // Validate a Rules definition. This function returns a slice of warnings and an error.
 func (r Rules) Validate() ([]string, error) {
-	if len(r.Apply) == 0 && len(r.Delete) == 0 {
+	if r.IsEmpty() {
 		return []string{"No rules were defined"}, nil
 	}
 
@@ -203,6 +203,10 @@ func (r DeleteResourceRule) Validate() ([]string, error) {
 //
 // Mappings
 //
+
+func (r Rules) IsEmpty() bool {
+	return len(r.Apply) == 0 && len(r.Delete) == 0
+}
 
 // ToTypeMeta maps a DeleteResourceRule to a Kubernetes meta/v1 TypeMeta
 func (r DeleteResourceRule) ToTypeMeta() metav1.TypeMeta {

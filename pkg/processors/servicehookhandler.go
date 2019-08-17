@@ -15,7 +15,7 @@ import (
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/args"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/config"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/kubernetes"
+	"github.com/ggmaresca/azd-kubernetes-manager/pkg/templating"
 )
 
 var (
@@ -39,9 +39,9 @@ var (
 
 // ServiceHookHandler is an HTTP handler for service hooks
 type ServiceHookHandler struct {
-	args      args.ServiceHookArgs
-	config    []config.ServiceHook
-	k8sClient kubernetes.ClientAsync
+	args        args.ServiceHookArgs
+	config      []config.ServiceHook
+	ruleHandler RuleHandler
 }
 
 func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -94,30 +94,36 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 	if h.args.UseBasicAuthentication() {
 		if ok && username == h.args.Username && password == h.args.Password {
 			if logger.LogDebug() {
-				logger.Debugf("Validated basic authentication for request \"%s\"", requestObj.Describe())
+				logger.Debugf("[%s] Validated basic authentication", requestObj.Describe())
 			}
 		} else {
-			logger.Errorf("Failed to validate basic authentication for request \"%s\"")
+			logger.Errorf("[%s] Failed to validate basic authentication", requestObj.Describe())
 			serviceHookErrorCounter.With(prometheus.Labels{"eventType": requestObj.EventType, "reason": fmt.Sprintf("HTTP %d Unauthorized", http.StatusUnauthorized)}).Inc()
 			writer.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 	} else if ok {
-		logger.Infof("Basic authentication was provided in request \"%s\", but basic authentication was not configured.", requestObj.Describe())
+		logger.Noticef("[%s] Basic authentication was provided, but basic authentication was not configured.", requestObj.Describe())
 	}
 
 	for pos, config := range h.config {
 		matches, err := config.Matches(requestObj)
 		if err != nil {
-			logger.Errorf("Error determining if Service Hook configuration %d matches request \"%s\"", pos, requestObj.Describe())
+			logger.Errorf("[%s] Error determining if Service Hook configuration %d matches request", requestObj.Describe(), pos)
 			serviceHookErrorCounter.With(prometheus.Labels{"eventType": requestObj.EventType, "reason": "Error matching configuration"}).Inc()
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		if matches {
-			logger.Infof("Processing Service Hook configuration %d for request %s", pos, requestObj.Describe())
+			logger.Infof("[%s] Processing Service Hook configuration %d", requestObj.Describe(), pos)
 
-			// TODO process rules
+			err := h.ruleHandler.Handle(config.Rules, templating.NewArgsFromServiceHook(*requestObj))
+			if err != nil {
+				logger.Errorf("[%s] Error processing rules: %s", requestObj.Describe(), err.Error())
+				serviceHookErrorCounter.With(prometheus.Labels{"eventType": requestObj.EventType, "reason": "Error processing rules"}).Inc()
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 
 			if !config.Continue {
 				break
@@ -130,10 +136,10 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 }
 
 // NewServiceHookHandler creates a an HTTP handler for Service Hooks
-func NewServiceHookHandler(args args.ServiceHookArgs, config []config.ServiceHook, k8sClient kubernetes.ClientAsync) ServiceHookHandler {
+func NewServiceHookHandler(args args.ServiceHookArgs, config []config.ServiceHook, ruleHandler RuleHandler) ServiceHookHandler {
 	return ServiceHookHandler{
-		args:      args,
-		config:    config,
-		k8sClient: k8sClient,
+		args:        args,
+		config:      config,
+		ruleHandler: ruleHandler,
 	}
 }

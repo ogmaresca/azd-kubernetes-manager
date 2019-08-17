@@ -20,7 +20,7 @@ func TestHTTPMethod(t *testing.T) {
 		Password: "VeryStrongP@$$W0RD",
 	}
 
-	handler := processors.NewServiceHookHandler(args, []config.ServiceHook{}, kubernetes.MakeFromClient(kubernetesmock.MockK8sClient{}))
+	handler := processors.NewServiceHookHandler(args, []config.ServiceHook{}, processors.NewRuleHandler(kubernetes.MakeFromClient(kubernetesmock.MockK8sClient{})))
 
 	httpMethods := []string{"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"}
 
@@ -53,7 +53,7 @@ func TestBasicAuthentication(t *testing.T) {
 		Password: "VeryStrongP@$$W0RD",
 	}
 
-	handler := processors.NewServiceHookHandler(args, []config.ServiceHook{}, kubernetes.MakeFromClient(kubernetesmock.MockK8sClient{}))
+	handler := processors.NewServiceHookHandler(args, []config.ServiceHook{}, processors.NewRuleHandler(kubernetes.MakeFromClient(kubernetesmock.MockK8sClient{})))
 
 	t.Run("basicauthentication_test_good", func(t *testing.T) {
 		req, err := http.NewRequest("POST", "/serviceHooks", bytes.NewBufferString("{ \"eventType\": \"mock\" }"))

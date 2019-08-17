@@ -82,7 +82,7 @@ func getConfigFile(args args.Args) config.File {
 
 func serveHTTP(args args.Args, configFile config.File, k8sClient kubernetes.ClientAsync) {
 	mux := http.NewServeMux()
-	mux.Handle("/serviceHooks", processors.NewServiceHookHandler(args.ServiceHooks, configFile.ServiceHooks, k8sClient))
+	mux.Handle("/serviceHooks", processors.NewServiceHookHandler(args.ServiceHooks, configFile.ServiceHooks, processors.NewRuleHandler(k8sClient)))
 
 	var healthMux *http.ServeMux
 	if args.ServiceHooks.Port != args.Health.Port {

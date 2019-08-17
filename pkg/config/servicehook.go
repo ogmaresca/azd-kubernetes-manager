@@ -162,7 +162,7 @@ func (shrf ServiceHookResourceFilters) Validate() ([]string, error) {
 	}
 
 	for pos, filter := range shrf.Templates {
-		templatedFilter, err := templating.Execute("ConfigFileValidation", filter, sampleServiceHook)
+		templatedFilter, err := templating.Execute("ConfigFileValidation", filter, sampleServiceHook.Resource)
 		if err != nil {
 			errors = append(errors, fmt.Sprintf("Template filter %d error: %s", pos, err.Error()))
 		} else if templatedFilter != filter {
@@ -258,7 +258,7 @@ func (sh ServiceHook) Matches(serviceHook *azuredevops.ServiceHook) (bool, error
 	}
 
 	for pos, filter := range sh.ResourceFilters.Templates {
-		templatedFilter, err := templating.Execute("ServiceHook", filter, *serviceHook)
+		templatedFilter, err := templating.Execute("ServiceHook", filter, serviceHook.Resource)
 		if err != nil {
 			return false, fmt.Errorf("Error running template filter %d: %s", pos, err.Error())
 		}
