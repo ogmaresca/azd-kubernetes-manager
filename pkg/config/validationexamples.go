@@ -1,7 +1,6 @@
 package config
 
 import (
-	"net/url"
 	"time"
 
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
@@ -10,11 +9,6 @@ import (
 
 var (
 	sampleServiceHook = func() azuredevops.ServiceHook {
-		forceParseURL := func(strURL string) *url.URL {
-			structURL, _ := url.Parse(strURL)
-			return structURL
-		}
-
 		intPtr := func(i int) *int {
 			return &i
 		}
@@ -31,8 +25,8 @@ var (
 			ID:          "SampleUserId",
 			DisplayName: "FirstName Last-Name",
 			UniqueName:  "firstnamelast-name@example.com",
-			URL:         forceParseURL("https://dev.azure.com/SampleOrganization/_apis/Identities/d6245f20-2af8-44f4-9451-8107cb2767db"),
-			ImageURL:    forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_api/_common/identityImage?id=d6245f20-2af8-44f4-9451-8107cb2767db"),
+			URL:         strPtr("https://dev.azure.com/SampleOrganization/_apis/Identities/d6245f20-2af8-44f4-9451-8107cb2767db"),
+			ImageURL:    strPtr("https://dev.azure.com/SampleOrganization/SampleProject/_api/_common/identityImage?id=d6245f20-2af8-44f4-9451-8107cb2767db"),
 			Descriptor:  "Sample Descriptor",
 		}
 
@@ -112,12 +106,12 @@ var (
 			EventType: string(azuredevops.ServiceHookEventTypeBuildComplete),
 			Resource: azuredevops.ServiceHookResource{
 				IntDefinition: azuredevops.IntDefinition{ID: 1, Name: "Sample Resource"},
-				URL:           forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/sample/SampleID"),
+				URL:           strPtr("https://dev.azure.com/SampleOrganization/SampleProject/_apis/sample/SampleID"),
 				Reason:        strPtr(string(azuredevops.ReasonContinuousIntegration)),
 				Status:        strPtr(string(azuredevops.StatusSucceeded)),
 
 				ServiceHookResourceBuildComplete: azuredevops.ServiceHookResourceBuildComplete{
-					URI:          forceParseURL("vstfs:///Build/Build/2"),
+					URI:          strPtr("vstfs:///Build/Build/2"),
 					BuildNumber:  strPtr("190813.01"),
 					StartTime:    &sampleTime,
 					FinishTime:   &sampleTime,
@@ -125,13 +119,13 @@ var (
 					Drop: &azuredevops.ServiceHookResourceBuildDrop{
 						Location:    "#/1/drop",
 						Type:        "container",
-						URL:         *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/resources/Containers/3/drop"),
-						DownloadURL: *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/resources/Containers/3/drop?api-version=1.0&$format=zip&downloadFileName=ConsumerAddressModule_20150407.1_drop"),
+						URL:         "https://dev.azure.com/SampleOrganization/SampleProject/_apis/resources/Containers/3/drop",
+						DownloadURL: "https://dev.azure.com/SampleOrganization/SampleProject/_apis/resources/Containers/3/drop?api-version=1.0&$format=zip&downloadFileName=ConsumerAddressModule_20150407.1_drop",
 					},
 					Log: &azuredevops.ServiceHookResourceBuildLog{
 						Type:        "container",
-						URL:         *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/resources/Containers/3/logs"),
-						DownloadURL: *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/resources/Containers/3/logs?api-version=1.0&$format=zip&downloadFileName=ConsumerAddressModule_20150407.1_logs"),
+						URL:         "https://dev.azure.com/SampleOrganization/SampleProject/_apis/resources/Containers/3/logs",
+						DownloadURL: "https://dev.azure.com/SampleOrganization/SampleProject/_apis/resources/Containers/3/logs?api-version=1.0&$format=zip&downloadFileName=ConsumerAddressModule_20150407.1_logs",
 					},
 					SourceGetVersion:   strPtr("LG:refs/heads/master:aaabcbcajlasjksakhdsakdhsdhkas"),
 					LastChangedBy:      &sampleUser,
@@ -140,7 +134,7 @@ var (
 					Definition: &azuredevops.ServiceHookResourceBuildDefinition{
 						ServiceHookResourceDefinition: azuredevops.ServiceHookResourceDefinition{
 							IntDefinition: azuredevops.IntDefinition{ID: 1, Name: "Sample Build"},
-							URL:           *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/build-release/Definitions/1"),
+							URL:           "https://dev.azure.com/SampleOrganization/SampleProject/_apis/build-release/Definitions/1",
 						},
 						BatchSize:      1,
 						TriggerType:    string(azuredevops.ServiceHookResourceBuildDefinitionTriggerTypeNone),
@@ -149,7 +143,7 @@ var (
 					Queue: &azuredevops.ServiceHookResourceBuildQueue{
 						ServiceHookResourceDefinition: azuredevops.ServiceHookResourceDefinition{
 							IntDefinition: azuredevops.IntDefinition{ID: 1, Name: "Sample Queue"},
-							URL:           *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/build-release/Queues/1"),
+							URL:           "https://dev.azure.com/SampleOrganization/SampleProject/_apis/build-release/Queues/1",
 						},
 						QueueType: string(azuredevops.ServiceHookResourceBuildQueueTypeBuildController),
 					},
@@ -210,7 +204,7 @@ var (
 							"Microsoft.Azure DevOps Services.Common.Severity": "3 - Medium",
 						},
 						ID:  1,
-						URL: *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/wit/workItems/1/revisions/1"),
+						URL: "https://dev.azure.com/SampleOrganization/SampleProject/_apis/wit/workItems/1/revisions/1",
 					},
 				},
 
@@ -232,7 +226,7 @@ var (
 					Release:          azuredevops.IntDefinition{ID: 1, Name: "Sample Release"},
 					ReleaseDefinition: azuredevops.ServiceHookResourceDefinition{
 						IntDefinition: azuredevops.IntDefinition{ID: 1, Name: "Sample Release"},
-						URL:           *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/Release/definitions/1"),
+						URL:           "https://dev.azure.com/SampleOrganization/SampleProject/_apis/Release/definitions/1",
 					},
 				},
 
@@ -261,7 +255,7 @@ var (
 					},
 					ReleaseDefinition: azuredevops.ServiceHookResourceDefinition{
 						IntDefinition: azuredevops.IntDefinition{ID: 1, Name: "Sample Release"},
-						URL:           *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/Release/definitions/1"),
+						URL:           "https://dev.azure.com/SampleOrganization/SampleProject/_apis/Release/definitions/1",
 					},
 					Description:                "Sample Release Description",
 					Reason:                     string(azuredevops.ReasonContinuousIntegration),
@@ -269,7 +263,7 @@ var (
 					KeepForever:                false,
 					DefinitionSnapshotRevision: 1,
 					Comment:                    "Sample Release Coment",
-					LogsContainerURL:           forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/Release/sample/logs/1"),
+					LogsContainerURL:           strPtr("https://dev.azure.com/SampleOrganization/SampleProject/_apis/Release/sample/logs/1"),
 				},
 
 				Environment: &sampleEnvironment,
@@ -278,10 +272,10 @@ var (
 
 				Repository: &azuredevops.GitRepository{
 					StrDefinition: azuredevops.StrDefinition{ID: "SampleRepositoryId", Name: "SampleRepository"},
-					URL:           *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId"),
+					URL:           "https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId",
 					Project: azuredevops.GitProject{
 						StrDefinition: azuredevops.StrDefinition{ID: "SampleProjectId", Name: "SampleProject"},
-						URL:           *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/projects/SampleProjectId"),
+						URL:           "https://dev.azure.com/SampleOrganization/SampleProject/_apis/projects/SampleProjectId",
 						State:         "wellFormed",
 					},
 				},
@@ -289,11 +283,11 @@ var (
 				Commits: []azuredevops.GitCommit{
 					azuredevops.GitCommit{
 						CommitID: "SampleCommitId1",
-						URL:      *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId1"),
+						URL:      "https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId1",
 					},
 					azuredevops.GitCommit{
 						CommitID: "SampleCommitId2",
-						URL:      *forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId2"),
+						URL:      "https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId2",
 					},
 				},
 			},

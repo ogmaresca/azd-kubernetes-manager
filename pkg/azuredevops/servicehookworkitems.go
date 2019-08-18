@@ -1,7 +1,6 @@
 package azuredevops
 
 import (
-	"net/url"
 	"time"
 )
 
@@ -28,5 +27,5 @@ type ServiceHookResourceWorkItemsUpdatedRevision struct {
 	Rev    *int              `json:"rev"`
 	Fields map[string]string `json:"fields"`
 	ID     int               `json:"id"`
-	URL    url.URL           `json:"url"`
+	URL    string            `json:"url"`
 }

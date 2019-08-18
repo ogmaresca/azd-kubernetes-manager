@@ -1,7 +1,6 @@
 package azuredevops
 
 import (
-	"net/url"
 	"time"
 )
 
@@ -24,7 +23,7 @@ type Release struct {
 	KeepForever                bool                          `json:"keepForever"`
 	DefinitionSnapshotRevision int                           `json:"definitionSnapshotRevision"`
 	Comment                    string                        `json:"comment"`
-	LogsContainerURL           *url.URL                      `json:"logsContainerUrl"`
+	LogsContainerURL           *string                       `json:"logsContainerUrl"`
 }
 
 // ReleaseArtifact holds an artifact of a Release

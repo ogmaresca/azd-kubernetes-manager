@@ -1,7 +1,5 @@
 package azuredevops
 
-import "net/url"
-
 // IntDefinition is the base type for Azure Devops responses
 type IntDefinition struct {
 	ID   int    `json:"id"`
@@ -16,12 +14,12 @@ type StrDefinition struct {
 
 // User fields in the Azure Devops API
 type User struct {
-	DisplayName string   `json:"displayName"`
-	URL         *url.URL `json:"url"`
-	ID          string   `json:"id"`
-	UniqueName  string   `json:"uniqueName"`
-	ImageURL    *url.URL `json:"imageUrl"`
-	Descriptor  string   `json:"descriptor"`
+	DisplayName string  `json:"displayName"`
+	URL         *string `json:"url"`
+	ID          string  `json:"id"`
+	UniqueName  string  `json:"uniqueName"`
+	ImageURL    *string `json:"imageUrl"`
+	Descriptor  string  `json:"descriptor"`
 }
 
 // Error is returned when an error occurs in the API, such as an invalid ID being used.

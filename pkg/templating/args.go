@@ -42,19 +42,13 @@ func NewArgsFromServiceHook(serviceHook azuredevops.ServiceHook) Args {
 		buildNumber = serviceHook.Resource.BuildNumber
 	}
 
-	var resourceURL *string
-	if serviceHook.Resource.URL != nil {
-		url := serviceHook.Resource.URL.String()
-		resourceURL = &url
-	}
-
 	return Args{
 		EventType:     serviceHook.EventType,
 		PullRequestID: serviceHook.Resource.PullRequestID,
 		BuildID:       buildID,
 		BuildNumber:   buildNumber,
 		ProjectName:   serviceHook.GetProjectName(),
-		ResourceURL:   resourceURL,
+		ResourceURL:   serviceHook.Resource.URL,
 		StartTime:     serviceHook.Resource.StartTime,
 		FinishTime:    serviceHook.Resource.FinishTime,
 		ResourceName:  serviceHook.Resource.Name,

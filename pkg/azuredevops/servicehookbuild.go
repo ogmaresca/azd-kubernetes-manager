@@ -1,13 +1,12 @@
 package azuredevops
 
 import (
-	"net/url"
 	"time"
 )
 
 // ServiceHookResourceBuildComplete holds fields related to the Service Hook resource for build.complete events
 type ServiceHookResourceBuildComplete struct {
-	URI                *url.URL                            `json:"uri"`
+	URI                *string                             `json:"uri"`
 	BuildNumber        *string                             `json:"buildNumber"`
 	StartTime          *time.Time                          `json:"startTime"`
 	FinishTime         *time.Time                          `json:"finishTime"`
@@ -25,17 +24,17 @@ type ServiceHookResourceBuildComplete struct {
 
 // ServiceHookResourceBuildDrop holds the drop field of a Resource
 type ServiceHookResourceBuildDrop struct {
-	Location    string  `json:"location"`
-	Type        string  `json:"type"`
-	URL         url.URL `json:"url"`
-	DownloadURL url.URL `json:"downloadUrl"`
+	Location    string `json:"location"`
+	Type        string `json:"type"`
+	URL         string `json:"url"`
+	DownloadURL string `json:"downloadUrl"`
 }
 
 // ServiceHookResourceBuildLog holds the log field of a Resource
 type ServiceHookResourceBuildLog struct {
-	Type        string  `json:"type"`
-	URL         url.URL `json:"url"`
-	DownloadURL url.URL `json:"downloadUrl"`
+	Type        string `json:"type"`
+	URL         string `json:"url"`
+	DownloadURL string `json:"downloadUrl"`
 }
 
 // ServiceHookResourceBuildQueue holds the Queue definition of pipeline Service Hooks
@@ -46,9 +45,9 @@ type ServiceHookResourceBuildQueue struct {
 
 // ServiceHookResourceBuildRequests holds the Requests definition of pipeline Service Hooks
 type ServiceHookResourceBuildRequests struct {
-	ID           int     `json:"id"`
-	URL          url.URL `json:"url"`
-	RequestedFor User    `json:"requestedFor"`
+	ID           int    `json:"id"`
+	URL          string `json:"url"`
+	RequestedFor User   `json:"requestedFor"`
 }
 
 // ServiceHookResourceBuildDefinition holds the definition of the Service Hook resource

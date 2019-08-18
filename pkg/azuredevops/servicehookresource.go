@@ -1,9 +1,5 @@
 package azuredevops
 
-import (
-	"net/url"
-)
-
 // ServiceHookResource holds fields related to the Service Hook resource
 // Release event types:
 // - ms.vss-release.release-abandoned-event
@@ -36,9 +32,9 @@ type ServiceHookResource struct {
 	ServiceHookResourceWorkItems
 	ServiceHookResourceWorkItemsUpdated
 
-	URL    *url.URL `json:"url"`    // Event types: build.complete, Code, Pull Requests, Work Items
-	Reason *string  `json:"reason"` // Event types: build.complete, Releases, Release Deployment Approvals
-	Status *string  `json:"status"` // Event types: build.complete, Pull Requests
+	URL    *string `json:"url"`    // Event types: build.complete, Code, Pull Requests, Work Items
+	Reason *string `json:"reason"` // Event types: build.complete, Releases, Release Deployment Approvals
+	Status *string `json:"status"` // Event types: build.complete, Pull Requests
 
 	Approval    *Approval      `json:"approval"`    // Event types: Approvals
 	Release     *Release       `json:"release"`     // Event types: Releases, Release Deployment Approvals
@@ -63,5 +59,5 @@ type ServiceHookResourceContainer struct {
 // ServiceHookResourceDefinition holds a basic resource definition for Service Hooks
 type ServiceHookResourceDefinition struct {
 	IntDefinition
-	URL url.URL `json:"url"`
+	URL string `json:"url"`
 }

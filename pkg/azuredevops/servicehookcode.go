@@ -1,7 +1,6 @@
 package azuredevops
 
 import (
-	"net/url"
 	"time"
 )
 
@@ -46,7 +45,7 @@ type GitCommit struct {
 	Author   GitUser `json:"author"`
 	Comitter GitUser `json:"committer"`
 	Comment  string  `json:"comment"`
-	URL      url.URL `json:"url"`
+	URL      string  `json:"url"`
 }
 
 // GitUser represents a user in Git
@@ -66,29 +65,29 @@ type GitRefUpdate struct {
 // GitRepository holds information about a Git repository
 type GitRepository struct {
 	StrDefinition
-	URL           url.URL    `json:"url"`
+	URL           string     `json:"url"`
 	Project       GitProject `json:"project"`
 	DefaultBranch string     `json:"defaultBranch"`
-	RemoteURL     url.URL    `json:"removeURL"`
+	RemoteURL     string     `json:"removeURL"`
 }
 
 // GitProject holds info about the Azure Devops project of a repository
 type GitProject struct {
 	StrDefinition
-	URL   url.URL `json:"url"`
-	State string  `json:"string"`
+	URL   string `json:"url"`
+	State string `json:"string"`
 }
 
 // GitMergeCommit holds info about a merge commit
 type GitMergeCommit struct {
-	CommitID string   `json:"commitId"`
-	URL      *url.URL `json:"url"`
+	CommitID string  `json:"commitId"`
+	URL      *string `json:"url"`
 }
 
 // GitReviewer holds info about a Pull Request reviewer
 type GitReviewer struct {
 	User
-	ReviewerURL *url.URL `json:"reviewerUrl"`
-	Vote        int      `json:"vote"`
-	IsContainer bool     `json:"isContainer"`
+	ReviewerURL *string `json:"reviewerUrl"`
+	Vote        int     `json:"vote"`
+	IsContainer bool    `json:"isContainer"`
 }

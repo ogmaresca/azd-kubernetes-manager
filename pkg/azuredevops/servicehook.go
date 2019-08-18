@@ -152,7 +152,7 @@ const (
 
 	// ServiceHookEventTypeReleaseDeploymentApprovalCompleted represents the Release Deployment Approval Completed event
 	ServiceHookEventTypeReleaseDeploymentApprovalCompleted ServiceHookEventType = "ms.vss-release.deployment-approval-completed-event"
-	// ServiceHookEventTypeReleaseDeploymentApprovalPending represents the Release Deployment Approval Pending event
+	// ServiceHookEventTypeReleaseDeploymestringntApprovalPending represents the Release Deployment Approval Pending event
 	ServiceHookEventTypeReleaseDeploymentApprovalPending ServiceHookEventType = "ms.vss-release.deployment-approval-pending-event"
 
 	// ServiceHookEventTypeReleaseDeploymentCompleted represents the Release Deployment Completed event
