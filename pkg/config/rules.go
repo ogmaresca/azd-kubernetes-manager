@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // Rules lists all of the rules to perform upon an event
@@ -31,7 +32,7 @@ type DeleteResourceRule struct {
 	Kind string `yaml:"kind"`
 
 	// The resource namespace
-	Namespace *string `yaml:"namespace"`
+	Namespace string `yaml:"namespace,omitempty"`
 
 	// The label selector
 	Selector LabelSelector `yaml:"selector"`
@@ -164,20 +165,23 @@ func (r DeleteResourceRule) Validate() ([]string, error) {
 
 	if r.APIVersion == "" {
 		errors = append(errors, "The Kubernetes API Version `APIVersion` must be defined. Use \"v1\" for the core API.")
+	} else {
+		split := strings.Split(r.APIVersion, "/")
+		if len(split) != 1 && len(split) != 2 {
+			errors = append(errors, fmt.Sprintf("Invalid API Version '%s'", r.APIVersion))
+		}
 	}
 
 	if r.Kind == "" {
 		errors = append(errors, "The Kubernetes resource `Kind` must be defined.")
 	}
 
-	if r.Namespace != nil && *r.Namespace == "" {
-		errors = append(errors, "The Kubernetes `Namespace` must not be empty if provided.")
-	} else if r.Namespace != nil {
-		templatedNamespace, err := templating.Execute("ConfigFileValidation", *r.Namespace, sampleTemplatingArgs)
+	if r.Namespace != "" {
+		templatedNamespace, err := templating.Execute("ConfigFileValidation", r.Namespace, sampleTemplatingArgs)
 		if err != nil {
 			errors = append(errors, fmt.Sprintf("Delete rule namespace templating error: %s", err.Error()))
-		} else if logger.LogDebug() && templatedNamespace != *r.Namespace {
-			logger.Debugf("Converted Delete rule namespace template:\n  %s\nto:\n  %s", strings.ReplaceAll(*r.Namespace, "\n", "\n  "), strings.ReplaceAll(templatedNamespace, "\n", "\n  "))
+		} else if logger.LogDebug() && templatedNamespace != r.Namespace {
+			logger.Debugf("Converted Delete rule namespace template:\n  %s\nto:\n  %s", strings.ReplaceAll(r.Namespace, "\n", "\n  "), strings.ReplaceAll(templatedNamespace, "\n", "\n  "))
 		}
 	}
 
@@ -204,6 +208,7 @@ func (r DeleteResourceRule) Validate() ([]string, error) {
 // Mappings
 //
 
+// IsEmpty returns true if the Rules has doesn't contain any rules
 func (r Rules) IsEmpty() bool {
 	return len(r.Apply) == 0 && len(r.Delete) == 0
 }
@@ -211,6 +216,16 @@ func (r Rules) IsEmpty() bool {
 // ToTypeMeta maps a DeleteResourceRule to a Kubernetes meta/v1 TypeMeta
 func (r DeleteResourceRule) ToTypeMeta() metav1.TypeMeta {
 	return metav1.TypeMeta{Kind: r.Kind, APIVersion: r.APIVersion}
+}
+
+// ToGroupVersion maps a DeleteResourceRule to a GroupVersion
+func (r DeleteResourceRule) ToGroupVersion() schema.GroupVersion {
+	split := strings.Split(r.APIVersion, "/")
+	if len(split) == 1 {
+		return schema.GroupVersion{Group: "", Version: split[0]}
+	} else {
+		return schema.GroupVersion{Group: split[0], Version: split[1]}
+	}
 }
 
 // String returns the rule as a string

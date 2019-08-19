@@ -13,3 +13,10 @@ func (s IntSet) Contains(key int) bool {
 	_, exists := s[key]
 	return exists
 }
+
+// Each executes a function for every item in the set
+func (s IntSet) Each(f func(key int)) {
+	for key := range s {
+		f(key)
+	}
+}

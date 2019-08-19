@@ -1,7 +1,10 @@
 package config
 
 import (
+	"strings"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // KubernetesResource represents a Kubernetes resource, which has both Type and metadata information
@@ -42,5 +45,15 @@ func (r KubernetesResourceMetadata) ToObjectMeta() metav1.ObjectMeta {
 		Namespace:    r.Namespace,
 		Labels:       r.Labels,
 		Annotations:  r.Annotations,
+	}
+}
+
+// ToGroupVersion maps a KubernetesResource to a GroupVersion
+func (r KubernetesResource) ToGroupVersion() schema.GroupVersion {
+	split := strings.Split(r.APIVersion, "/")
+	if len(split) == 1 {
+		return schema.GroupVersion{Group: "", Version: split[0]}
+	} else {
+		return schema.GroupVersion{Group: split[0], Version: split[1]}
 	}
 }

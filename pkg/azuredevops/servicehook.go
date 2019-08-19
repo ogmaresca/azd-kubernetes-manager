@@ -22,7 +22,7 @@ type ServiceHook struct {
 
 // Describe returns a user-friendly descriptor for this Service Hook
 func (sh ServiceHook) Describe() string {
-	return fmt.Sprintf("(%s %s) %s", sh.EventType, sh.ID, sh.DetailedMessage.Text)
+	return fmt.Sprintf("(%s %s) %s", sh.EventType, sh.ID, sh.Message.Text)
 }
 
 // GetStatus returns the status of the project from the Service Hook

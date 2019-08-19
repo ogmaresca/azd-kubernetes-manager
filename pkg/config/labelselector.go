@@ -173,7 +173,7 @@ func (ls LabelSelector) ToKubernetesLabelSelector() metav1.LabelSelector {
 
 // ToTemplatedKubernetesLabelSelector templates a LabelSelector and then maps it to a k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector
 func (ls LabelSelector) ToTemplatedKubernetesLabelSelector(args templating.Args) (metav1.LabelSelector, error) {
-	var templatedMatchLabels map[string]string
+	templatedMatchLabels := make(map[string]string)
 	for label, value := range ls.MatchLabels {
 		templatedValue, err := templating.Execute("LabelSelector", value, args)
 		if err != nil {

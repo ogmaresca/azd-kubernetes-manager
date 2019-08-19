@@ -15,3 +15,10 @@ func (s StringSet) Contains(key string) bool {
 	_, exists := s[key]
 	return exists
 }
+
+// Each executes a function for every item in the set
+func (s StringSet) Each(f func(key string)) {
+	for key := range s {
+		f(key)
+	}
+}

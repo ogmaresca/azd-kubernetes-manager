@@ -33,8 +33,14 @@ func (rh RuleHandlerImpl) Handle(rules config.Rules, args templating.Args) error
 
 	var channels []chan error
 	for _, rule := range rules.Apply {
-		channel := make(chan error, len(rules.Apply)+len(rules.Delete))
-		rh.handleApply(rule, args, channel)
+		channel := make(chan error)
+		go rh.handleApply(rule, args, channel)
+		channels = append(channels, channel)
+	}
+
+	for _, rule := range rules.Delete {
+		channel := make(chan error)
+		go rh.handleDelete(rule, args, channel)
 		channels = append(channels, channel)
 	}
 
@@ -55,11 +61,39 @@ func (rh RuleHandlerImpl) Handle(rules config.Rules, args templating.Args) error
 }
 
 // handleApply executes Apply Resource rules
-func (rh RuleHandlerImpl) handleApply(rules config.ApplyResourceRule, args templating.Args, channel chan<- error) {
+func (rh RuleHandlerImpl) handleApply(rule config.ApplyResourceRule, args templating.Args, channel chan<- error) {
+	defer func() {
+		if err := recover(); err != nil { //catch
+			channel <- fmt.Errorf("Recovered from panic when executing apply resource rule: %v", err)
+		}
+	}()
+
+	logger.Alert("Apply resource rule is not implemented")
+
 	channel <- nil
 }
 
 // handleDelete executes Delete Resource rules
-func (rh RuleHandlerImpl) handleDelete(rules config.DeleteResourceRule, args templating.Args, channel chan<- error) {
+func (rh RuleHandlerImpl) handleDelete(rule config.DeleteResourceRule, args templating.Args, channel chan<- error) {
+	defer func() {
+		if err := recover(); err != nil { //catch
+			channel <- fmt.Errorf("Recovered from panic when executing delete resource rule: %v", err)
+		}
+	}()
+
+	logger.Debugf("Processing delete resource rule:\n%s", rule.Describe())
+
+	templatedSelector, err := rule.Selector.ToTemplatedKubernetesLabelSelector(args)
+	if err != nil {
+		channel <- fmt.Errorf("Error templating delete resource rule:\n%s\nError: %s", rule.Describe(), err.Error())
+		return
+	}
+
+	err = rh.client.Sync().Delete(rule.APIVersion, rule.Kind, rule.Namespace, templatedSelector)
+	if err != nil {
+		channel <- fmt.Errorf("Error applying delete resource rule:\n%s\nError: %s", rule.Describe(), err.Error())
+		return
+	}
+
 	channel <- nil
 }

@@ -106,6 +106,7 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 		logger.Noticef("[%s] Basic authentication was provided, but basic authentication was not configured.", requestObj.Describe())
 	}
 
+	anyMatches := false
 	for pos, config := range h.config {
 		matches, err := config.Matches(requestObj)
 		if err != nil {
@@ -115,6 +116,8 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 			return
 		}
 		if matches {
+			anyMatches = true
+
 			logger.Infof("[%s] Processing Service Hook configuration %d", requestObj.Describe(), pos)
 
 			err := h.ruleHandler.Handle(config.Rules, templating.NewArgsFromServiceHook(*requestObj))
@@ -129,6 +132,10 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 				break
 			}
 		}
+	}
+
+	if !anyMatches {
+		logger.Infof("[%s] Service Hook did not match any configuration rule", requestObj.Describe())
 	}
 
 	writer.WriteHeader(http.StatusOK)

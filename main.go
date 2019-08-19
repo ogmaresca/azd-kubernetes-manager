@@ -81,8 +81,13 @@ func getConfigFile(args args.Args) config.File {
 }
 
 func serveHTTP(args args.Args, configFile config.File, k8sClient kubernetes.ClientAsync) {
+	pathPrefix := strings.Trim(args.ServiceHooks.BasePath, "/")
+	if pathPrefix != "" {
+		pathPrefix = "/" + pathPrefix
+	}
+
 	mux := http.NewServeMux()
-	mux.Handle("/serviceHooks", processors.NewServiceHookHandler(args.ServiceHooks, configFile.ServiceHooks, processors.NewRuleHandler(k8sClient)))
+	mux.Handle(fmt.Sprintf("%s/serviceHooks", pathPrefix), processors.NewServiceHookHandler(args.ServiceHooks, configFile.ServiceHooks, processors.NewRuleHandler(k8sClient)))
 
 	var healthMux *http.ServeMux
 	if args.ServiceHooks.Port != args.Health.Port {
@@ -91,8 +96,8 @@ func serveHTTP(args args.Args, configFile config.File, k8sClient kubernetes.Clie
 		healthMux = mux
 	}
 
-	healthMux.Handle("/healthz", health.LivenessCheck{})
-	healthMux.Handle("/metrics", promhttp.Handler())
+	healthMux.Handle(fmt.Sprintf("%s/healthz", pathPrefix), health.LivenessCheck{})
+	healthMux.Handle(fmt.Sprintf("%s/metrics", pathPrefix), promhttp.Handler())
 
 	go func() {
 		err := http.ListenAndServe(fmt.Sprintf(":%d", args.ServiceHooks.Port), mux)
