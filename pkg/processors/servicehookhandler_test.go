@@ -10,7 +10,6 @@ import (
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/args"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/config"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/kubernetes"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/kubernetesmock"
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/processors"
 )
 
@@ -20,7 +19,7 @@ func TestHTTPMethod(t *testing.T) {
 		Password: "VeryStrongP@$$W0RD",
 	}
 
-	handler := processors.NewServiceHookHandler(args, []config.ServiceHook{}, processors.NewRuleHandler(kubernetes.MakeFromClient(kubernetesmock.MockK8sClient{})))
+	handler := processors.NewServiceHookHandler(args, []config.ServiceHook{}, processors.NewRuleHandler(kubernetes.MakeFromClient(NewMockKubernetesClient())))
 
 	httpMethods := []string{"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"}
 
@@ -53,7 +52,7 @@ func TestBasicAuthentication(t *testing.T) {
 		Password: "VeryStrongP@$$W0RD",
 	}
 
-	handler := processors.NewServiceHookHandler(args, []config.ServiceHook{}, processors.NewRuleHandler(kubernetes.MakeFromClient(kubernetesmock.MockK8sClient{})))
+	handler := processors.NewServiceHookHandler(args, []config.ServiceHook{}, processors.NewRuleHandler(kubernetes.MakeFromClient(NewMockKubernetesClient())))
 
 	t.Run("basicauthentication_test_good", func(t *testing.T) {
 		req, err := http.NewRequest("POST", "/serviceHooks", bytes.NewBufferString("{ \"eventType\": \"mock\" }"))

@@ -2,11 +2,16 @@
 
 azd-kubernetes-manager manages Kubernetes resources for Azure Devops.
 
-## Kubernetes Abilities
-
-* Deleting resources based on annotations or labels (planned)
-
 ## Azure Devops Abilities
 
-* Taking actions after Pull Requests are completed (API and service hooks) (planned).
+* Taking actions from Service Hooks.
+
+## Kubernetes Abilities
+
+* Deleting resources.
+
+## Configuration
+
+The configuration file is a YAML file. See [Configuration.md](Configuration.md) for more.
+
 

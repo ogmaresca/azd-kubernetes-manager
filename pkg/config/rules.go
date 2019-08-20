@@ -1,6 +1,7 @@
 package config
 
 import (
+	newerrors "errors"
 	"fmt"
 	"strings"
 
@@ -128,7 +129,7 @@ func (r Rules) Validate() ([]string, error) {
 
 	var err error
 	if len(errors) > 0 {
-		err = fmt.Errorf("%s", strings.Join(errors, "\n"))
+		err = newerrors.New(strings.Join(errors, "\n"))
 	}
 
 	return warnings, err
@@ -137,7 +138,7 @@ func (r Rules) Validate() ([]string, error) {
 // Validate a Delete Kubernetes Resouce rule definition. This function returns a slice of warnings and an error.
 func (r ApplyResourceRule) Validate() ([]string, error) {
 	if string(r) == "" {
-		return []string{}, fmt.Errorf("%s", "Apply rule must not be empty.")
+		return []string{}, newerrors.New("Apply rule must not be empty.")
 	}
 
 	strVal := r.String()
@@ -198,7 +199,7 @@ func (r DeleteResourceRule) Validate() ([]string, error) {
 	}
 
 	if len(errors) > 0 {
-		err = fmt.Errorf("%s", strings.Join(errors, "\n"))
+		err = newerrors.New(strings.Join(errors, "\n"))
 	}
 
 	return warnings, err

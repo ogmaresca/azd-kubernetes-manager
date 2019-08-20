@@ -54,7 +54,7 @@ func (rh RuleHandlerImpl) Handle(rules config.Rules, args templating.Args) error
 
 	var err error
 	if len(errors) > 0 {
-		err = fmt.Errorf("%s", strings.Join(errors, "\n"))
+		err = newerrors.New(strings.Join(errors, "\n"))
 	}
 
 	return err

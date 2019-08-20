@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"net/url"
 	"testing"
 
 	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
@@ -40,24 +39,24 @@ func TestMatches(t *testing.T) {
 						ID:   "MockRepositoryId",
 						Name: "MockRepository",
 					},
-					URL: forceParseURL("https://dev.azure.com/MockOrganization/MockProject/_apis/repos/git/repositories/MockRepositoryId", t),
+					URL: "https://dev.azure.com/MockOrganization/MockProject/_apis/repos/git/repositories/MockRepositoryId",
 					Project: azuredevops.GitProject{
 						StrDefinition: azuredevops.StrDefinition{
 							ID:   "MockProjectId",
 							Name: "MockProject",
 						},
-						URL:   forceParseURL("https://dev.azure.com/MockOrganization/MockProject/_apis/projects/MockProjectId", t),
+						URL:   "https://dev.azure.com/MockOrganization/MockProject/_apis/projects/MockProjectId",
 						State: "wellFormed",
 					},
 				},
 				Commits: []azuredevops.GitCommit{
 					azuredevops.GitCommit{
 						CommitID: "SampleCommitId1",
-						URL:      forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId1", t),
+						URL:      "https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId1",
 					},
 					azuredevops.GitCommit{
 						CommitID: "SampleCommitId2",
-						URL:      forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId2", t),
+						URL:      "https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId2",
 					},
 				},
 				Status: strPtr(string(azuredevops.StatusCompleted)),
@@ -99,24 +98,24 @@ func TestMatches(t *testing.T) {
 						ID:   "MockRepositoryId",
 						Name: "MockRepository",
 					},
-					URL: forceParseURL("https://dev.azure.com/MockOrganization/MockProject/_apis/repos/git/repositories/MockRepositoryId", t),
+					URL: "https://dev.azure.com/MockOrganization/MockProject/_apis/repos/git/repositories/MockRepositoryId",
 					Project: azuredevops.GitProject{
 						StrDefinition: azuredevops.StrDefinition{
 							ID:   "MockProjectId",
 							Name: "MockProject",
 						},
-						URL:   forceParseURL("https://dev.azure.com/MockOrganization/MockProject/_apis/projects/MockProjectId", t),
+						URL:   "https://dev.azure.com/MockOrganization/MockProject/_apis/projects/MockProjectId",
 						State: "wellFormed",
 					},
 				},
 				Commits: []azuredevops.GitCommit{
 					azuredevops.GitCommit{
 						CommitID: "SampleCommitId1",
-						URL:      forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId1", t),
+						URL:      "https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId1",
 					},
 					azuredevops.GitCommit{
 						CommitID: "SampleCommitId2",
-						URL:      forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId2", t),
+						URL:      "https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId2",
 					},
 				},
 				Status: strPtr(string(azuredevops.StatusCompleted)),
@@ -158,24 +157,24 @@ func TestMatches(t *testing.T) {
 						ID:   "MockRepositoryId",
 						Name: "MockRepository",
 					},
-					URL: forceParseURL("https://dev.azure.com/MockOrganization/MockProject/_apis/repos/git/repositories/MockRepositoryId", t),
+					URL: "https://dev.azure.com/MockOrganization/MockProject/_apis/repos/git/repositories/MockRepositoryId",
 					Project: azuredevops.GitProject{
 						StrDefinition: azuredevops.StrDefinition{
 							ID:   "MockProjectId",
 							Name: "MockProject",
 						},
-						URL:   forceParseURL("https://dev.azure.com/MockOrganization/MockProject/_apis/projects/MockProjectId", t),
+						URL:   "https://dev.azure.com/MockOrganization/MockProject/_apis/projects/MockProjectId",
 						State: "wellFormed",
 					},
 				},
 				Commits: []azuredevops.GitCommit{
 					azuredevops.GitCommit{
 						CommitID: "SampleCommitId1",
-						URL:      forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId1", t),
+						URL:      "https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId1",
 					},
 					azuredevops.GitCommit{
 						CommitID: "SampleCommitId2",
-						URL:      forceParseURL("https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId2", t),
+						URL:      "https://dev.azure.com/SampleOrganization/SampleProject/_apis/repos/git/repositories/SampleRepositoryId/commits/SampleCommitId2",
 					},
 				},
 				Status: strPtr(string(azuredevops.StatusCompleted)),
@@ -186,14 +185,6 @@ func TestMatches(t *testing.T) {
 			t.Errorf("Expected Service Hook to fail to match configuration rule due to an error")
 		}
 	})
-}
-
-func forceParseURL(strURL string, t *testing.T) url.URL {
-	structURL, err := url.Parse(strURL)
-	if err != nil {
-		t.Errorf("Error parsing URL %s: %s", strURL, err.Error())
-	}
-	return *structURL
 }
 
 func intPtr(i int) *int {

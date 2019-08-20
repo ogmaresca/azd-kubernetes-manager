@@ -1,0 +1,88 @@
+{
+  "id": "99557e9c-4c72-48cf-ad0e-afd2e2d11cfe",
+  "eventType": "build.complete",
+  "publisherId": "tfs",
+  "scope": "all",
+  "message": {
+    "text": "Build 2019.0819.1 succeeded",
+    "html": "Build <a href=\"https://dev.azure.com/sample-project/web/build.aspx?pcguid=99557e9c-4c72-48cf-ad0e-afd2e2d11cfe&amp;builduri=vstfs%3a%2f%2f%2fBuild%2fBuild%2f3\">ConsumerAddressModule_20150407.2</a> succeeded",
+    "markdown": "Build [2019.0819.1](https://dev.azure.com/sample-project/web/build.aspx?pcguid=99557e9c-4c72-48cf-ad0e-afd2e2d11cfe&builduri=vstfs%3a%2f%2f%2fBuild%2fBuild%2f3) succeeded"
+  },
+  "detailedMessage": {
+    "text": "Build 2019.0819.1 succeeded",
+    "html": "Build <a href=\"https://dev.azure.com/sample-project/web/build.aspx?pcguid=99557e9c-4c72-48cf-ad0e-afd2e2d11cfe&amp;builduri=vstfs%3a%2f%2f%2fBuild%2fBuild%2f3\">ConsumerAddressModule_20150407.2</a> succeeded",
+    "markdown": "Build [2019.0819.1](https://dev.azure.com/sample-project/web/build.aspx?pcguid=99557e9c-4c72-48cf-ad0e-afd2e2d11cfe&builduri=vstfs%3a%2f%2f%2fBuild%2fBuild%2f3) succeeded"
+  },
+  "resource": {
+    "uri": "vstfs:///Build/Build/2",
+    "id": 1,
+    "buildNumber": "2019.0819.1",
+    "url": "https://dev.azure.com/sample-project/DefaultCollection/99557e9c-4c72-48cf-ad0e-afd2e2d11cfe/_apis/build-release/Builds/2",
+    "startTime": "2015-04-07T18:04:06.83Z",
+    "finishTime": "2015-04-07T18:06:10.69Z",
+    "reason": "manual",
+    "status": "succeeded",
+    "dropLocation": "#/1/drop",
+    "drop": {
+      "location": "#/1/drop",
+      "type": "container",
+      "url": "https://dev.azure.com/sample-project/DefaultCollection/_apis/resources/Containers/1/drop",
+      "downloadUrl": "https://dev.azure.com/sample-project/DefaultCollection/_apis/resources/Containers/1/drop?api-version=1.0&$format=zip&downloadFileName=2019.0819.1_drop"
+    },
+    "log": {
+      "type": "container",
+      "url": "https://dev.azure.com/sample-project/DefaultCollection/_apis/resources/Containers/1/logs",
+      "downloadUrl": "https://dev.azure.com/sample-project/_apis/resources/Containers/1/logs?api-version=1.0&$format=zip&downloadFileName=2019.0819.1_logs"
+    },
+    "sourceGetVersion": "LG:refs/heads/master:600c52d2d5b655caa111abfd863e5a9bd304bb0e",
+    "lastChangedBy": {
+      "id": "99557e9c-4c72-48cf-ad0e-afd2e2d11cfe",
+      "displayName": "Sample User",
+      "uniqueName": "sampleuser@gmail.com",
+      "url": "https://dev.azure.com/sample-project/_apis/Identities/99557e9c-4c72-48cf-ad0e-afd2e2d11cfe",
+      "imageUrl": "https://dev.azure.com/sample-project/DefaultCollection/_api/_common/identityImage?id=99557e9c-4c72-48cf-ad0e-afd2e2d11cfe"
+    },
+    "retainIndefinitely": false,
+    "hasDiagnostics": true,
+    "definition": {
+      "batchSize": 1,
+      "triggerType": "none",
+      "definitionType": "xaml",
+      "id": 2,
+      "name": "ConsumerAddressModule",
+      "url": "https://dev.azure.com/sample-project/DefaultCollection/99557e9c-4c72-48cf-ad0e-afd2e2d11cfe/_apis/build-release/Definitions/2"
+    },
+    "queue": {
+      "queueType": "buildController",
+      "id": 4,
+      "name": "Hosted Build Controller",
+      "url": "https://dev.azure.com/sample-project/DefaultCollection/_apis/build-release/Queues/4"
+    },
+    "requests": [
+      {
+        "id": 1,
+        "url": "https://dev.azure.com/sample-project/DefaultCollection/99557e9c-4c72-48cf-ad0e-afd2e2d11cfe/_apis/build-release/Requests/1",
+        "requestedFor": {
+          "id": "99557e9c-4c72-48cf-ad0e-afd2e2d11cfe",
+          "displayName": "Sample User",
+          "uniqueName": "sampleuser@gmail.com",
+          "url": "https://dev.azure.com/sample-project/_apis/Identities/99557e9c-4c72-48cf-ad0e-afd2e2d11cfe",
+          "imageUrl": "https://dev.azure.com/sample-project/DefaultCollection/_api/_common/identityImage?id=99557e9c-4c72-48cf-ad0e-afd2e2d11cfe"
+        }
+      }
+    ]
+  },
+  "resourceVersion": "1.0",
+  "resourceContainers": {
+    "collection": {
+      "id": "99557e9c-4c72-48cf-ad0e-afd2e2d11cfe"
+    },
+    "account": {
+      "id": "99557e9c-4c72-48cf-ad0e-afd2e2d11cfe"
+    },
+    "project": {
+      "id": "99557e9c-4c72-48cf-ad0e-afd2e2d11cfe"
+    }
+  },
+  "createdDate": "2019-08-19T01:02:03.4567890Z"
+}

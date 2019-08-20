@@ -1,6 +1,7 @@
 package config
 
 import (
+	newerrors "errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -33,7 +34,7 @@ func validate(slice []FileSection, description string) ([]string, error) {
 
 	var err error
 	if len(errors) > 0 {
-		err = fmt.Errorf("%s", strings.Join(errors, "\n"))
+		err = newerrors.New(strings.Join(errors, "\n"))
 	}
 
 	return warnings, err

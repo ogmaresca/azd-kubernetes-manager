@@ -1,6 +1,7 @@
 package config
 
 import (
+	newerrors "errors"
 	"fmt"
 	"strings"
 
@@ -72,7 +73,7 @@ func (lsr LabelSelectorRequirement) Describe() string {
 // Validate a LabelSelector. This function returns a slice of warnings and an error.
 func (ls LabelSelector) Validate() ([]string, error) {
 	if len(ls.MatchLabels) == 0 && len(ls.MatchExpressions) == 0 {
-		return []string{}, fmt.Errorf("%s", "No label `Selector` was defined. See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ for defining set-based requirement selectors.")
+		return []string{}, newerrors.New("No label `Selector` was defined. See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ for defining set-based requirement selectors.")
 	}
 
 	var warnings, errors []string
@@ -103,7 +104,7 @@ func (ls LabelSelector) Validate() ([]string, error) {
 
 	var err error
 	if len(errors) > 0 {
-		err = fmt.Errorf("%s", strings.Join(errors, "\n"))
+		err = newerrors.New(strings.Join(errors, "\n"))
 	}
 
 	return warnings, err
@@ -148,7 +149,7 @@ func (lsr LabelSelectorRequirement) Validate() ([]string, error) {
 
 	var err error
 	if len(errors) > 0 {
-		err = fmt.Errorf("%s", strings.Join(errors, "\n"))
+		err = newerrors.New(strings.Join(errors, "\n"))
 	}
 
 	return warnings, err

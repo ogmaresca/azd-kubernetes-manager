@@ -1,6 +1,7 @@
 package config
 
 import (
+	newerrors "errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -136,7 +137,7 @@ func (sh ServiceHook) Validate() ([]string, error) {
 	}
 
 	if len(errors) > 0 {
-		err = fmt.Errorf("%s", joinYAMLSlice(errors))
+		err = newerrors.New(joinYAMLSlice(errors))
 	}
 
 	return rulesWarnings, err
@@ -181,7 +182,7 @@ func (shrf ServiceHookResourceFilters) Validate() ([]string, error) {
 
 	var err error
 	if len(errors) > 0 {
-		err = fmt.Errorf("%s", joinYAMLSlice(errors))
+		err = newerrors.New(joinYAMLSlice(errors))
 	}
 
 	return warnings, err

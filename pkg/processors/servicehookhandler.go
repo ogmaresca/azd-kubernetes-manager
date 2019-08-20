@@ -67,9 +67,6 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 		return
 	}
 	requestStr := string(buffer.Bytes())
-	if logger.LogDebug() {
-		logger.Debugf("Received service hook: %s", requestStr)
-	}
 
 	// Parse JSON
 	requestObj := new(azuredevops.ServiceHook)
@@ -79,6 +76,10 @@ func (h ServiceHookHandler) ServeHTTP(writer http.ResponseWriter, request *http.
 		serviceHookErrorCounter.With(prometheus.Labels{"eventType": "unknown", "reason": "JSON parse error"}).Inc()
 		writer.WriteHeader(http.StatusBadRequest)
 		return
+	}
+
+	if logger.LogDebug() {
+		logger.Debugf("Received service hook: %s", requestStr)
 	}
 
 	// Prometheus metrics
