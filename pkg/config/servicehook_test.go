@@ -25,7 +25,7 @@ func TestMatches(t *testing.T) {
 			Resource: azuredevops.ServiceHookResource{
 				ServiceHookResourcePullRequest: azuredevops.ServiceHookResourcePullRequest{
 					PullRequestID: intPtr(1),
-					CreatedBy: azuredevops.User{
+					CreatedBy: &azuredevops.User{
 						ID:          "MockUserId",
 						DisplayName: "Barack Obama",
 					},
@@ -84,7 +84,7 @@ func TestMatches(t *testing.T) {
 			Resource: azuredevops.ServiceHookResource{
 				ServiceHookResourcePullRequest: azuredevops.ServiceHookResourcePullRequest{
 					PullRequestID: intPtr(1),
-					CreatedBy: azuredevops.User{
+					CreatedBy: &azuredevops.User{
 						ID:          "MockUserId",
 						DisplayName: "Barack Obama",
 					},
@@ -143,7 +143,7 @@ func TestMatches(t *testing.T) {
 			Resource: azuredevops.ServiceHookResource{
 				ServiceHookResourcePullRequest: azuredevops.ServiceHookResourcePullRequest{
 					PullRequestID: intPtr(1),
-					CreatedBy: azuredevops.User{
+					CreatedBy: &azuredevops.User{
 						ID:          "MockUserId",
 						DisplayName: "Barack Obama",
 					},

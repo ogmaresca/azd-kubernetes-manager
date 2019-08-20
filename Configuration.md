@@ -6,7 +6,7 @@ Some configuration fields support [Go templating](https://golang.org/pkg/text/te
 
 Any templating in the configuration file will be tested on startup with some sample values to validate the go templating.
 
-NOTE: When referring to fields, ALL fields are capitalized and all acronyms (URI, URL, HTML, etc...) are capitalized.
+NOTE: When referring to fields, ALL fields are capitalized and all acronyms (ID, URI, URL, HTML, etc...) in the field name are capitalized.
 
 ## Service Hooks
 

@@ -172,7 +172,7 @@ var (
 
 				ServiceHookResourcePullRequest: azuredevops.ServiceHookResourcePullRequest{
 					PullRequestID: intPtr(1),
-					CreatedBy:     sampleUser,
+					CreatedBy:     &sampleUser,
 					Title:         strPtr("Sample Pull Request"),
 					Description:   strPtr("2 commits"),
 					SourceRefName: strPtr("refs/heads/feature/Sample"),

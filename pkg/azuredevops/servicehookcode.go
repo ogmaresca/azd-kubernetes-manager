@@ -24,7 +24,7 @@ type ServiceHookResourceCodePushed struct {
 // ServiceHookResourcePullRequest holds fields related to the Service Hook resource for Pull Request events
 type ServiceHookResourcePullRequest struct {
 	PullRequestID         *int            `json:"pullRequestId"`
-	CreatedBy             User            `json:"createdBy"`
+	CreatedBy             *User           `json:"createdBy"`
 	CreationDate          *time.Time      `json:"creationDate"`
 	ClosedDate            *time.Time      `json:"closedDate"` // Event types: git.pullrequest.merged, git.pullrequest.updated
 	Title                 *string         `json:"title"`
