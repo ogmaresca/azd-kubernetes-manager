@@ -17,7 +17,7 @@ var (
 	port       = flag.Int("port", 10102, "The port to serve HTTP requests.")
 	username   = flag.String("username", "", "The username to use for Service Hooks basic authentication.")
 	password   = flag.String("password", "", "The password to use for Service Hooks basic authentication.")
-	healthPort = flag.Int("healh-port", 10902, "The port to serve health checks and metrics.")
+	healthPort = flag.Int("health-port", 10902, "The port to serve health checks and metrics.")
 )
 
 // Args holds all of the program arguments

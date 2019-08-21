@@ -1,0 +1,155 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "azd-kubernetes-manager.fullname" . }}
+  labels:
+    {{- include "azd-kubernetes-manager.labels" . | nindent 4 }}
+    {{- include "azd-kubernetes-manager.stringDict" .Values.labels | nindent 4 }}
+  {{- if .Values.annotations }}
+  annotations:
+    {{- include "azd-kubernetes-manager.stringDict" .Values.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  minReadySeconds: {{ .Values.minReadySeconds }}
+  replicas: 1
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- with .Values.updateStrategy }}
+  strategy:
+    {{- . | toYaml | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "azd-kubernetes-manager.selector" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "azd-kubernetes-manager.labels" . | nindent 8 }}
+        {{- include "azd-kubernetes-manager.stringDict" .Values.podLabels | nindent 8 }}
+      {{- if .Values.podAnnotations }}
+      annotations:
+        {{- include "azd-kubernetes-manager.stringDict" .Values.podAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- .Values.image.pullSecrets | toYaml | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "azd-kubernetes-manager.serviceAccountName" . }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if and .Values.username .Values.password }}
+        env:
+        - name: BASIC_AUTH_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "azd-kubernetes-manager.fullname" . }}
+              key: username
+        - name: BASIC_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "azd-kubernetes-manager.fullname" . }}
+              key: password
+        {{- end }}
+        args:
+        - '--log={{ .Values.logLevel }}'
+        - '--rate={{ .Values.rate }}'
+        - '--config-file=/home/azd-kubernetes-manager/configuration.yaml'
+        - '--base-path={{ include "azd-kubernetes-manager.basePath" . }}'
+        - '--port=10102'
+        - '--health-port={{ .Values.combinePorts | ternary 10102 10902 }}'
+        {{- if and .Values.username .Values.password }}
+        - '--username=$(BASIC_AUTH_USERNAME)'
+        - '--password=$(BASIC_AUTH_PASSWORD)'
+        {{- end }}
+        ports:
+        - containerPort: 10102
+          name: http
+          protocol: TCP
+        {{- if not .Values.combinePorts }}
+        - containerPort: 10902
+          name: metrics
+          protocol: TCP
+        {{- end }}
+        volumeMounts:
+        - name: configuration
+          mountPath: "/home/azd-kubernetes-manager/configuration.yaml"
+          subPath: "configuration.yaml"
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: {{ include "azd-kubernetes-manager.basePath" . }}/healthz
+            port: {{ .Values.combinePorts | ternary "http" "metrics" }}
+            scheme: HTTP
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+        {{- with .Values.resources }}
+        resources:
+          {{- . | toYaml | nindent 10 }}
+        {{- end }}
+        {{- if .Values.lifecycle }}
+        lifecycle:
+          {{- .Values.lifecycle | toYaml | nindent 10 }}
+        {{- end }}
+      
+      {{- if .Values.sidecars }}
+        {{- .Values.sidecars | toYaml | nindent 6 }}
+      {{- end }}
+      
+      volumes:
+      - name: configuration
+        configMap:
+          name: {{ include "azd-kubernetes-manager.fullname" . }}
+
+      {{- if .Values.initContainers }}
+      initContainers:
+        {{- .Values.initContainers | toYaml | nindent 8 }}
+      {{- end }}
+      
+      {{- if .Values.activeDeadlineSeconds }}
+      activeDeadlineSeconds: {{ .Values.activeDeadlineSeconds }}
+      {{- end }}
+      {{- if .Values.dnsPolicy }}
+      dnsPolicy: {{ .Values.dnsPolicy }}
+      {{- end }}
+      {{ if .Values.dnsConfig }}
+      dnsConfig:
+        {{- .Values.dnsConfig | toYaml | nindent 8 }}
+      {{- end }}
+      restartPolicy: {{ .Values.restartPolicy }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- .Values.nodeSelector | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.affinity }}
+      affinity:
+        {{- .Values.affinity | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+        {{- .Values.tolerations | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.securityContext }}
+      securityContext:
+        {{- .Values.securityContext | toYaml | nindent 8 }}
+      {{- end }}
+      hostNetwork: {{ .Values.hostNetwork }}
+      {{- if .Values.priority }}
+      priority: {{ .Value.priority }}
+      {{- end }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Value.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.priority }}
+      priority: {{ .Values.priority }}
+      {{- end }}
+      {{- if .Values.runtimeClassName }}
+      runtimeClassName: {{ .Value.runtimeClassName | quote }}
+      {{- end }}
+      {{- if .Values.schedulerName }}
+      schedulerName: {{ .Value.schedulerName | quote }}
+      {{- end }}

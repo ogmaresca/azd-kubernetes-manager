@@ -1,0 +1,16 @@
+{{ if and .Values.rbac.create .Values.rbac.rules }}
+apiVersion: v1
+kind: List
+items:
+{{- range $namespace, $rules := .Values.rbac.rules }}
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: {{ include "azd-kubernetes-manager.fullname" . | quote }}
+    namespace: {{ $namespace | quote }}
+    labels:
+      {{- include "azd-kubernetes-manager.labels" . | nindent 6 }}
+  rules:
+    {{- $rules | toYaml | nindent 4 }}
+{{- end }}
+{{- end }}

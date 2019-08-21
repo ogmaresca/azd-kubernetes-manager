@@ -5,7 +5,7 @@ go-build:
 	go build -o ../bin/azd-kubernetes-manager .
 
 go-run:
-	../bin/azd-kubernetes-manager --token=${AZURE_DEVOPS_TOKEN} --url=${AZURE_DEVOPS_URL} --config-file example-config.yaml --log=debug
+	../bin/azd-kubernetes-manager --token=${AZURE_DEVOPS_TOKEN} --url=${AZURE_DEVOPS_URL} --config-file example-config.yaml --log=debug --username=a --password=b
 
 go-test:
 	go clean -testcache && go test -cover ./...
@@ -38,10 +38,10 @@ helm-lint:
 	helm lint charts/azd-kubernetes-manager
 
 helm-template:
-	helm template charts/azd-kubernetes-manager --set azd.url=https://dev.azure.com/test,azd.token=abc123def456ghi789jkl,pdb.enabled=true,serviceMonitor.enabled=true
+	helm template charts/azd-kubernetes-manager --values=example-helm-values.yaml
 
 helm-install:
-	helm upgrade --debug --install azd-kubernetes-manager charts/azd-kubernetes-manager --set azd.url=${AZURE_DEVOPS_URL},azd.existingSecret=azd-agent,azd.existingSecretKey=azd-token,logLevel=trace
+	helm upgrade --debug --install azd-kubernetes-manager charts/azd-kubernetes-manager --values=example-helm-values.yaml
 
 helm-package:
 	helm package charts/azd-kubernetes-manager -d charts && \

@@ -1,0 +1,74 @@
+logLevel: debug
+
+username: a
+password: b
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  basePath: /azd
+  hosts:
+  - azd-mgr.k8s.local
+
+pdb:
+  enabled: true
+
+rbac:
+  clusterRules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["list", "delete"]
+
+serviceMonitor:
+  enabled: true
+
+configuration:
+  serviceHooks:
+  - event: git.pullrequest.updated
+    resourceFilters:
+      statuses:
+      - completed
+      - abandoned
+      reasons: []
+      projects: []
+      repositories: []
+      sourceRefs:
+      - refs/heads/feature/*
+      targetRefs:
+      - refs/heads/master
+      templates:
+      - '{{ .CreatedBy.DisplayName | title | contains "Obama" }}'
+    rules:
+      delete:
+      - apiVersion: v1
+        kind: Namespace
+        selector:
+          matchLabels:
+            azdPullRequestId: '{{ .PullRequestID }}'
+          matchExpressions:
+          - key: azdPreserve
+            operator: DoesNotExist
+            values: []
+  - event: build.complete
+    resourceFilters:
+      statuses: []
+      reasons:
+      - manual
+      projects: []
+      templates:
+      - '{{ eq .Definition.DefinitionType "yaml" }}'
+    rules:
+      delete:
+      - apiVersion: v1
+        kind: Namespace
+        selector:
+          matchLabels:
+            azdBuildId: '{{ .BuildID }}'
+          matchExpressions:
+          - key: azdPreserve
+            operator: DoesNotExist
+            values: []
+          - key: azdPullRequestId
+            operator: DoesNotExist
+            values: []

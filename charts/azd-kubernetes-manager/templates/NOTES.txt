@@ -1,0 +1,3 @@
+Installs {{ .Chart.Description }}.
+
+See https://github.com/ggmaresca/azd-kubernetes-manager.

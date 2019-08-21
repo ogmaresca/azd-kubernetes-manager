@@ -1,0 +1,41 @@
+{{ if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "azd-kubernetes-manager.fullname" . }}
+  namespace: {{ .Values.serviceMonitor.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "azd-kubernetes-manager.labels" . | nindent 4 }}
+    {{- include "azd-kubernetes-manager.stringDict" .Values.serviceMonitor.labels | nindent 4 }}
+spec:
+  jobLabel: {{ template "azd-kubernetes-manager.fullname" . }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  endpoints:
+  - port: {{ .Values.combinePorts | ternary "http" "metrics" }}
+    interval: {{ .Values.serviceMonitor.interval | default .Values.rate }}
+    path: {{ include "azd-kubernetes-manager.basePath" . }}/metrics
+    targetPort: {{ .Values.combinePorts | ternary "http" "metrics" }}
+    scheme: http
+    {{- if .Values.serviceMonitor.honorLabels }}
+    honorLabels: true
+    {{- end }}
+    {{- with .Values.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+      {{- . | toYaml | nindent 6 }}
+    {{- end }}
+    {{- with .Values.serviceMonitor.relabelings }}
+    relabelings:
+      {{- . | toYaml | nindent 6 }}
+    {{- end }}
+  podTargetLabels:
+  - name
+  - release
+  {{- range $key, $value := .Values.podLabels }}
+  - {{ $key | quote }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "azd-kubernetes-manager.selector" . | nindent 6 }}
+{{ end }}

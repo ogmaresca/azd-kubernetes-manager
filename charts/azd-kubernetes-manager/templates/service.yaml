@@ -1,0 +1,34 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "azd-kubernetes-manager.fullname" . }}
+  labels:
+    {{- include "azd-kubernetes-manager.labels" . | nindent 4 }}
+    {{- include "azd-kubernetes-manager.stringDict" .Values.service.labels | nindent 4 }}
+  {{- if .Values.service.annotations }}
+  annotations:
+    {{- include "azd-kubernetes-manager.stringDict" .Values.service.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  {{- if ne .Values.service.type "ClusterIP" }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  {{- end }}
+  ports:
+  - name: http
+    port: {{ .Values.service.port }}
+    {{- if .Values.service.nodePort }}
+    nodePort: {{ .Values.service.nodePort }}
+    {{- end }}
+    protocol: TCP
+    targetPort: http
+  {{- if .Values.combinePorts }}
+  - name: metrics
+    port: 10902
+    protocol: TCP
+    targetPort: metrics
+  {{- end }}
+  selector:
+    {{- include "azd-kubernetes-manager.selector" . | nindent 4 }}
+{{- end }}

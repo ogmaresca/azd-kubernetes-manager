@@ -1,0 +1,10 @@
+{{ if and .Values.rbac.create .Values.rbac.clusterRules }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "azd-kubernetes-manager.fullname" . | quote }}
+  labels:
+    {{- include "azd-kubernetes-manager.labels" . | nindent 4 }}
+rules:
+  {{- .Values.rbac.clusterRules | toYaml | nindent 2 }}
+{{- end }}

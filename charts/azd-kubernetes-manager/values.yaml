@@ -1,0 +1,174 @@
+## Default values for azd-kubernetes-manager.
+## This is a YAML-formatted file.
+## Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: ""
+
+minReadySeconds: 0
+revisionHistoryLimit: 10
+
+## The update strategy of the Deployment
+updateStrategy:
+  type: Recreate
+
+image:
+  repository: docker.io/gmaresca/azd-kubernetes-manager
+  tag: 1.0.0
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+## debug, info, notice, warning, error, critical, alert, emergency, none
+logLevel: info
+## How often the Kubernetes and Azure Devops API should be polled
+rate: 10s
+
+## If true, listen on the same port for both service hooks and metrics/health
+combinePorts: false
+
+## The username to use for basic authentication with service hooks
+username: ''
+## The password to use for basic authentication with service hooks
+password: ''
+
+## The configuration file for azd-kubernetes-manager
+## See Configuration.md
+configuration:
+  serviceHooks: []
+
+## Resources requests and limits
+resources:
+  requests:
+    cpu: 0.05
+    memory: 16Mi
+  limits:
+    cpu: 0.1
+    memory: 64Mi
+
+## Service for service hooks and metrics
+service:
+  type: ClusterIP
+  externalTrafficPolicy: Local
+  ## The port for processing Service Hooks
+  ## It cannot be 10902 if combinePorts is true, as that's the metrics port
+  port: 80
+  #nodePort:
+  ## Labels to add to the deployment
+  annotations: {}
+  ## Annotations to add to the deployment
+  labels: {}
+
+## Ingress for service hooks
+ingress:
+  enabled: false
+  ## Labels to add to the deployment
+  labels: {}
+  ## Annotations to add to the deployment
+  annotations: {}
+  #  kubernetes.io/ingress.class: nginx
+  #  kubernetes.io/tls-acme: "true"
+  ## Ingress hosts
+  hosts: []
+  #- azd-kubernetes-manager.example.com
+
+  ## The base path to listen on
+  basePath: ''
+  tls:
+    ## If true, enable TLS for the Ingress hosts
+    enabled: false
+    ## The TLS secret name
+    #secretName: ''
+
+## Liveness probe values
+## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
+livenessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 1
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+
+## Labels to add to the deployment
+labels: {}
+## Annotations to add to the deployment
+annotations: {}
+
+## Labels to add to the pods
+podLabels: {}
+## Annotations to add to the pods
+podAnnotations: {}
+  #prometheus.io/scrape: 'true'
+  #prometheus.io/port: health
+  #prometheus.io/path: /metrics
+
+pdb:
+  ## Enable a PodDisruptionBudget
+  enabled: false
+  minAvailable: 50%
+  #maxUnavailable: 50%
+
+rbac:
+  create: true
+
+  ## RBAC rules to create on a cluster-level
+  clusterRules: []
+  #- apiGroups: ["*"]
+  #  resources: ["*"]
+  #  verbs: ["list", "delete"]
+
+  ## RBAC rules to apply on a per-namespace level
+  rules: {}
+  #  default:
+  #  - apiGroups: ["*"]
+  #    resources: ["*"]
+  #    verbs: ["list", "delete"]
+
+serviceAccount:
+  ## Specifies whether a ServiceAccount should be created
+  create: true
+  ## The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the fullname template
+  name:
+
+## Values for a Prometheus-Operator ServiceMonitor
+## Ref: https://github.com/helm/charts/blob/master/stable/prometheus-operator/templates/prometheus-operator/crd-servicemonitor.yaml
+## Requires having the release stable/prometheus-operator installed
+serviceMonitor:
+  enabled: false
+  #namespace: 
+  ## Labels to add to the PodMonitor
+  labels: {}
+  # honorLabels: true
+  #interval: 30s
+  metricRelabelings: []
+  relabelings: []
+
+#dnsPolicy: ClusterFirst
+dnsConfig: {}
+
+## The deployment restart policy
+restartPolicy: Always
+
+## Node labels selecting nodes to run on
+## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+nodeSelector: {}
+
+## Node tolerations for scheduling to nodes with taints
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+tolerations: []
+
+affinity: {}
+
+## Security Context policies for the pod
+securityContext: {}
+
+## Whether to use the network of the host node
+hostNetwork: false
+
+## Containers to run before the main container starts
+initContainers: []
+
+lifecycle: {}
+
+## Additional containers to deploy in the pod
+sidecars: []
