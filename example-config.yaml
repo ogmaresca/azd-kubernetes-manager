@@ -1,5 +1,5 @@
 serviceHooks:
-- event: git.pullrequest.updated
+- event: git.pullrequest.created
   resourceFilters:
     statuses:
     - active

@@ -2,7 +2,7 @@
 
 ## Go Templating
 
-Some configuration fields support [Go templating](https://golang.org/pkg/text/template/). The Go templates use the [Sprig](http://masterminds.github.io/sprig/) library. You can read more about Go templating from the [Helm templating guide](https://helm.sh/docs/chart_template_guide/).
+Some configuration fields support [Go templating](https://golang.org/pkg/text/template/). The Go templates use the [Sprig](http://masterminds.github.io/sprig/) library, version 2.20. You can read more about Go templating from the [Helm templating guide](https://helm.sh/docs/chart_template_guide/).
 
 Any templating in the configuration file will be tested on startup with some sample values to validate the go templating.
 
@@ -99,6 +99,12 @@ The template resource filters are executed as Go Templates. The value given to t
 | `delete[].namespace`  | The namespace of the resources to delete.                                                                                          | Yes          |
 | `delete[].selector`   | The [LabelSelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.15/#labelselector-v1-meta) to find resources. | Yes          |
 
+
+### Kubernetes RBAC
+
+The Service Account that AZD Kubernetes Manager runs under must have Kubernetes RBAC rules allowed for every rule that is configured.
+
+* Delete rules require the verbs `list` and `delete` on the API Groups and Resources that AZD Kubernetes Manager is configured to delete.
 
 ### Go Templating Values for Rules
 
