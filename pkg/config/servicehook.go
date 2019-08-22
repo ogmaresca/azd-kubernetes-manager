@@ -208,7 +208,7 @@ func (sh ServiceHook) Matches(serviceHook *azuredevops.ServiceHook) (bool, error
 	}
 
 	reason := serviceHook.GetReason()
-	if reason != nil && !contains(*reason, sh.ResourceFilters.Statuses) {
+	if reason != nil && !contains(*reason, sh.ResourceFilters.Reasons) {
 		return false, nil
 	}
 

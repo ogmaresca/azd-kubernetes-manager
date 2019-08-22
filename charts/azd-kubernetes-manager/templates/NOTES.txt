@@ -1,3 +1,10 @@
 Installs {{ .Chart.Description }}.
 
 See https://github.com/ggmaresca/azd-kubernetes-manager.
+
+
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+Service Hooks can be called on https://{{ . }}{{ include "azd-kubernetes-manager.basePath" $ }}/serviceHooks {{ if and $.Values.username $.Values.password }}with basic authentication{{ end }}
+{{- end }}
+{{- end }}

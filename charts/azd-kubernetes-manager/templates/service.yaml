@@ -23,7 +23,7 @@ spec:
     {{- end }}
     protocol: TCP
     targetPort: http
-  {{- if .Values.combinePorts }}
+  {{- if not .Values.combinePorts }}
   - name: metrics
     port: 10902
     protocol: TCP
