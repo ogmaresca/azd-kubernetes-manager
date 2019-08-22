@@ -23,6 +23,9 @@ rbac:
 serviceMonitor:
   enabled: true
 
+grafanaDashboard:
+  enabled: true
+
 configuration:
   serviceHooks:
   - event: git.pullrequest.updated

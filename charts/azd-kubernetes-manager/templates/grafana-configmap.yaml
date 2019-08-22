@@ -1,0 +1,12 @@
+{{- if .Values.grafanaDashboard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "azd-kubernetes-manager.fullname" . }}-grafana-dashboard
+  labels:
+    {{- include "azd-kubernetes-manager.labels" . | nindent 4 }}
+    {{- include "azd-kubernetes-manager.stringDict" .Values.grafanaDashboard.labels | nindent 4 }}
+data:
+  '{{ include "azd-kubernetes-manager.fullname" . }}.json': |
+    {{- "dashboards/grafana.json" | .Files.Get | replace .Chart.Name (include "azd-kubernetes-manager.fullname" .) | nindent 4 }}
+{{- end }}
