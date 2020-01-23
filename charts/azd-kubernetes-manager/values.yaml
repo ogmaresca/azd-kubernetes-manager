@@ -129,6 +129,8 @@ serviceAccount:
   ## The name of the ServiceAccount to use.
   ## If not set and create is true, a name is generated using the fullname template
   name:
+  ## Annotations to add to the ServiceAccount
+  annotations: {}
 
 ## Values for a Prometheus-Operator ServiceMonitor
 ## Ref: https://github.com/helm/charts/blob/master/stable/prometheus-operator/templates/prometheus-operator/crd-servicemonitor.yaml
