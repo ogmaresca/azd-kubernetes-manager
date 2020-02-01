@@ -30,7 +30,7 @@ spec:
     {{- range .Values.ingress.hosts }}
   - hosts:
     - {{ . }}
-	  {{- if $.Values.ingress.secretName }}
+    {{- if $.Values.ingress.secretName }}
     secretName: {{ $.Values.ingress.secretName | quote }}
     {{- end }}
     {{- end }}

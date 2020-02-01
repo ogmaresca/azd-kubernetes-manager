@@ -65,6 +65,7 @@ Common labels
 */}}
 {{- define "azd-kubernetes-manager.labels" -}}
 {{ include "azd-kubernetes-manager.selector" . }}
+app: {{ include "azd-kubernetes-manager.fullname" . }}
 chart: {{ include "azd-kubernetes-manager.chart" . }}
 {{- if .Chart.AppVersion }}
 version: {{ .Chart.AppVersion | quote }}
