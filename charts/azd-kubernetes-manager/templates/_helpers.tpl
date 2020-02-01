@@ -25,6 +25,20 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
+Create the name of the pod security policy to use
+*/}}
+{{- define "azd-kubernetes-manager.psp.name" -}}
+{{- default .Values.rbac.psp.name (printf "%s-%s" .Release.Namespace (include "azd-kubernetes-manager.fullname" .)) | trunc 63 -}}
+{{- end -}}
+
+{{/*
+Create the name of the pod security policy role(binding) to use
+*/}}
+{{- define "azd-kubernetes-manager.psp.rbacname" -}}
+{{- printf "%s-psp" (include "azd-kubernetes-manager.fullname" . | trunc 59) -}}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "azd-kubernetes-manager.chart" -}}

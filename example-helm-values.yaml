@@ -19,6 +19,8 @@ rbac:
   - apiGroups: [""]
     resources: ["namespaces"]
     verbs: ["list", "delete"]
+  psp:
+    enabled: true
 
 serviceMonitor:
   enabled: true

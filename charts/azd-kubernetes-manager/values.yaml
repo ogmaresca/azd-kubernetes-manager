@@ -123,12 +123,28 @@ rbac:
   #    resources: ["*"]
   #    verbs: ["list", "delete"]
 
+  psp:
+    ## Create a PodSecurityPolicy
+    enabled: false
+    ## Override the PodSecurityPolicy name
+    # name:
+    ## Labels to add to the PodSecurityPolicy
+    labels: {}
+    ## Annotations to add to the PodSecurityPolicy
+    annotations: {}
+    ## Enforce AppArmor in created PodSecurityPolicy
+    appArmorProfile: 'default/runtime'
+    ## Enforce seccomp in created PodSecurityPolicy
+    seccompProfile: 'docker/runtime'
+
 serviceAccount:
   ## Specifies whether a ServiceAccount should be created
   create: true
   ## The name of the ServiceAccount to use.
   ## If not set and create is true, a name is generated using the fullname template
   name:
+  ## Labels to add to the ServiceAccount
+  labels: {}
   ## Annotations to add to the ServiceAccount
   annotations: {}
 
