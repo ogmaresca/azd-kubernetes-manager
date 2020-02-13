@@ -1,6 +1,6 @@
 module github.com/ggmaresca/azd-kubernetes-manager
 
-go 1.12
+go 1.13
 
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
