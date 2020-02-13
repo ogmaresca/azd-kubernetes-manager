@@ -1,17 +1,7 @@
-# Create base stage first to cache commands
-FROM alpine:3.10 AS final_base
-
-EXPOSE 10102
-EXPOSE 10902
-
-RUN apk update && apk add --no-cache ca-certificates bash
-
-RUN adduser -D -g '' azd-kubernetes-manager
-
 # Download modules
-FROM golang:1.12-alpine3.10 AS base
+FROM golang:1.13-alpine3.11 AS base
 
-RUN apk update && apk add --no-cache git ca-certificates tzdata
+RUN apk add --no-cache git ca-certificates tzdata
 
 WORKDIR /go/src
 
@@ -33,15 +23,18 @@ COPY pkg /go/src/pkg
 RUN go build -ldflags="-w -s" -o /go/bin/azd-kubernetes-manager
 
 # Use alpine as final base stage
-FROM final_base AS final
+FROM alpine:3.11 AS final
 
-COPY --from=build /go/bin/azd-kubernetes-manager /bin/azd-kubernetes-manager
+EXPOSE 10102
+EXPOSE 10902
 
-RUN chown azd-kubernetes-manager /bin/azd-kubernetes-manager
+RUN adduser -D -g '' -u 1000 azd-kubernetes-manager
 
 USER azd-kubernetes-manager
 
 WORKDIR /home/azd-kubernetes-manager
+
+COPY --from=build --chown=azd-kubernetes-manager /go/bin/azd-kubernetes-manager /bin/azd-kubernetes-manager
 
 ENTRYPOINT ["/bin/azd-kubernetes-manager"]
 CMD []

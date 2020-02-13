@@ -26,7 +26,7 @@ docker-build:
 	docker build -t azd-kubernetes-manager:dev .
 
 docker-run:
-	docker run -it --rm --name=azd-kubernetes-manager -v ${HOME}/.kube:/home/azd-kubernetes-manager/.kube:ro --network=host azd-kubernetes-manager:dev --name=azd-kubernetes-manager --namespace=default --token=${AZURE_DEVOPS_TOKEN} --url=${AZURE_DEVOPS_URL} --log-level=Trace
+	docker run -it --rm --name=azd-kubernetes-manager -v ${HOME}/.kube:/home/azd-kubernetes-manager/.kube:ro -v `pwd`/example-config.yaml://home/azd-kubernetes-manager/configuration.yaml:ro --network=host azd-kubernetes-manager:dev --token=${AZURE_DEVOPS_TOKEN} --url=${AZURE_DEVOPS_URL} --log=debug --config-file=/home/azd-kubernetes-manager/configuration.yaml
 
 docker-push:
 	sh docker-push.sh
@@ -41,7 +41,7 @@ helm-template:
 	helm template charts/azd-kubernetes-manager --values=example-helm-values.yaml
 
 helm-install:
-	helm upgrade --debug --install azd-kubernetes-manager charts/azd-kubernetes-manager --values=example-helm-values.yaml
+	helm upgrade --debug --install azd-kubernetes-manager charts/azd-kubernetes-manager --values=example-helm-values.yaml --set image.repository=azd-kubernetes-manager,image.tag=dev
 
 helm-package:
 	helm package charts/azd-kubernetes-manager -d charts && \

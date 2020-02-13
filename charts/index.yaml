@@ -2,8 +2,17 @@ apiVersion: v1
 entries:
   azd-kubernetes-manager:
   - apiVersion: v1
+    appVersion: 1.0.1
+    created: "2020-02-12T19:31:55.587400748-05:00"
+    description: A Helm chart for Azure Devops Kubernetes Manager
+    digest: 163af920d69c832a27da25f36adf1207dbadf30d44ce6089736be0db39fa882e
+    name: azd-kubernetes-manager
+    urls:
+    - azd-kubernetes-manager-1.0.5.tgz
+    version: 1.0.5
+  - apiVersion: v1
     appVersion: 1.0.0
-    created: "2020-01-31T20:08:20.851907372-05:00"
+    created: "2020-02-12T19:31:55.586454818-05:00"
     description: A Helm chart for Azure Devops Kubernetes Manager
     digest: 329e6a49934da7682eeb9749bf921f943cb541e7dbc79f650266dc0e2ff8784d
     name: azd-kubernetes-manager
@@ -12,7 +21,7 @@ entries:
     version: 1.0.4
   - apiVersion: v1
     appVersion: 1.0.0
-    created: "2020-01-31T20:08:20.850913098-05:00"
+    created: "2020-02-12T19:31:55.585584029-05:00"
     description: A Helm chart for Azure Devops Kubernetes Manager
     digest: 1a45751072c39debec7d262a549cd8f0a8d897aa5bfea673b9e5c8d60e0ac035
     name: azd-kubernetes-manager
@@ -21,7 +30,7 @@ entries:
     version: 1.0.3
   - apiVersion: v1
     appVersion: 1.0.0
-    created: "2020-01-31T20:08:20.849935265-05:00"
+    created: "2020-02-12T19:31:55.584716225-05:00"
     description: A Helm chart for Azure Devops Kubernetes Manager
     digest: 08b58d3e8070aab1e8d347309ac93c8ba25849b09db1ecb5b073d50eeb89c966
     name: azd-kubernetes-manager
@@ -30,7 +39,7 @@ entries:
     version: 1.0.2
   - apiVersion: v1
     appVersion: 1.0.0
-    created: "2020-01-31T20:08:20.849039514-05:00"
+    created: "2020-02-12T19:31:55.5832563-05:00"
     description: A Helm chart for Azure Devops Kubernetes Manager
     digest: c0798c6d54ca2b3d78106c20ef8ffd17d31c54b35af11fcfd7d38fdaeff97458
     name: azd-kubernetes-manager
@@ -39,11 +48,11 @@ entries:
     version: 1.0.1
   - apiVersion: v1
     appVersion: 1.0.0
-    created: "2020-01-31T20:08:20.848079103-05:00"
+    created: "2020-02-12T19:31:55.582397873-05:00"
     description: A Helm chart for Azure Devops Kubernetes Manager
     digest: 6e0594e8dc1f474ecaf7e8a3b7de8dfa3832288adb1bdccc3f5641221dfd86d0
     name: azd-kubernetes-manager
     urls:
     - azd-kubernetes-manager-1.0.0.tgz
     version: 1.0.0
-generated: "2020-01-31T20:08:20.846957774-05:00"
+generated: "2020-02-12T19:31:55.581618825-05:00"

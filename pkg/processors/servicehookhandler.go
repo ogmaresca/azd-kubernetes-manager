@@ -33,7 +33,7 @@ var (
 
 	serviceHookErrorCounter = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "azd_kubernetes_manager_service_hook_error_count",
-		Help: "The total number of Service Hooks",
+		Help: "The total number of Service Hook errors",
 	}, []string{"eventType", "reason"})
 )
 
