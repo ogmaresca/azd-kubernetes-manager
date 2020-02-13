@@ -133,9 +133,9 @@ rbac:
     ## Annotations to add to the PodSecurityPolicy
     annotations: {}
     ## Enforce AppArmor in created PodSecurityPolicy
-    appArmorProfile: 'default/runtime'
+    appArmorProfile: 'runtime/default'
     ## Enforce seccomp in created PodSecurityPolicy
-    seccompProfile: 'docker/runtime'
+    seccompProfile: 'runtime/default'
 
 serviceAccount:
   ## Specifies whether a ServiceAccount should be created

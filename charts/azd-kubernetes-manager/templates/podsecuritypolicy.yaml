@@ -12,13 +12,13 @@ metadata:
     seccomp.security.alpha.kubernetes.io/allowedProfileNames:  {{ .Values.rbac.psp.seccompProfile | quote }}
       {{- if ne .Values.rbac.psp.seccompProfile "*" }}
     seccomp.security.alpha.kubernetes.io/defaultProfileName:  {{ .Values.rbac.psp.seccompProfile | quote }}
-	    {{- end }}
+      {{- end }}
     {{- end }}
     {{- if .Values.rbac.psp.appArmorProfile }}
     apparmor.security.beta.kubernetes.io/allowedProfileNames:  {{ .Values.rbac.psp.appArmorProfile | quote }}
-	    {{- if ne .Values.rbac.psp.appArmorProfile "*" }}
+      {{- if ne .Values.rbac.psp.appArmorProfile "*" }}
     apparmor.security.beta.kubernetes.io/defaultProfileName:  {{ .Values.rbac.psp.appArmorProfile | quote }}
-	    {{- end }}
+      {{- end }}
     {{- end }}
 spec:
   privileged: false
