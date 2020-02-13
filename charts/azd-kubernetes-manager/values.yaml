@@ -10,7 +10,9 @@ revisionHistoryLimit: 10
 
 ## The update strategy of the Deployment
 updateStrategy:
-  type: Recreate
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
 
 image:
   repository: docker.io/gmaresca/azd-kubernetes-manager
@@ -183,7 +185,11 @@ tolerations: []
 affinity: {}
 
 ## Security Context policies for the pod
-securityContext: {}
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 2000
+  fsGroup: 3000
 
 ## Whether to use the network of the host node
 hostNetwork: false

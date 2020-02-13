@@ -30,7 +30,7 @@ EXPOSE 10902
 
 RUN adduser -D -g '' -u 1000 azd-kubernetes-manager
 
-USER azd-kubernetes-manager
+USER 1000
 
 WORKDIR /home/azd-kubernetes-manager
 
