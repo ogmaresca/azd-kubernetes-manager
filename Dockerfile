@@ -1,3 +1,9 @@
+# Download trusted root certificates
+FROM alpine:3.11 AS ca-certificates
+
+RUN apk add --no-cache ca-certificates && \
+    update-ca-certificates
+
 # Download modules
 FROM golang:1.13-alpine3.11 AS base
 
@@ -22,19 +28,19 @@ COPY pkg /go/src/pkg
 
 RUN go build -ldflags="-w -s" -o /go/bin/azd-kubernetes-manager
 
-# Use alpine as final base stage
-FROM alpine:3.11 AS final
+# Use a distroless final base
+FROM scratch AS final
 
 EXPOSE 10102
 EXPOSE 10902
-
-RUN adduser -D -g '' -u 1000 azd-kubernetes-manager
 
 USER 1000
 
 WORKDIR /home/azd-kubernetes-manager
 
-COPY --from=build --chown=azd-kubernetes-manager /go/bin/azd-kubernetes-manager /bin/azd-kubernetes-manager
+ENV HOME /home/azd-kubernetes-manager
+
+COPY --from=build --chown=1000 /go/bin/azd-kubernetes-manager /bin/azd-kubernetes-manager
 
 ENTRYPOINT ["/bin/azd-kubernetes-manager"]
 CMD []

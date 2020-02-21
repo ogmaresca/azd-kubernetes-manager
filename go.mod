@@ -2,6 +2,12 @@ module github.com/ggmaresca/azd-kubernetes-manager
 
 go 1.13
 
+// Remove glog, which writes to file
+// https://github.com/istio/istio/blob/master/go.mod
+replace github.com/golang/glog => github.com/istio/glog v0.0.0-20190424172949-d7cfb6fa2ccd
+
+replace k8s.io/klog => github.com/istio/klog v0.0.0-20190424230111-fb7481ea8bcf
+
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/semver v1.4.2 // indirect
@@ -12,12 +18,11 @@ require (
 	github.com/googleapis/gnostic v0.3.0 // indirect
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
-	github.com/kr/pretty v0.1.0 // indirect
 	github.com/prometheus/client_golang v1.1.0
 	github.com/spf13/pflag v1.0.3 // indirect
+	go.uber.org/zap v1.14.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
-	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 	k8s.io/api v0.0.0-20190313235455-40a48860b5ab // indirect

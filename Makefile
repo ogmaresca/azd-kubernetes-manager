@@ -2,7 +2,7 @@ go-lint:
 	golint -min_confidence=0.01 -set_exit_status=1
 
 go-build:
-	go build -o ../bin/azd-kubernetes-manager .
+	GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ../bin/azd-kubernetes-manager .
 
 go-run:
 	../bin/azd-kubernetes-manager --token=${AZURE_DEVOPS_TOKEN} --url=${AZURE_DEVOPS_URL} --config-file example-config.yaml --log=debug --username=a --password=b
@@ -26,7 +26,7 @@ docker-build:
 	docker build -t azd-kubernetes-manager:dev .
 
 docker-run:
-	docker run -it --rm --name=azd-kubernetes-manager -v ${HOME}/.kube:/home/azd-kubernetes-manager/.kube:ro -v `pwd`/example-config.yaml://home/azd-kubernetes-manager/configuration.yaml:ro --network=host azd-kubernetes-manager:dev --token=${AZURE_DEVOPS_TOKEN} --url=${AZURE_DEVOPS_URL} --log=debug --config-file=/home/azd-kubernetes-manager/configuration.yaml
+	docker run -it --rm --name=azd-kubernetes-manager -v ${HOME}/.kube:/home/azd-kubernetes-manager/.kube:ro -v `pwd`/example-config.yaml://home/azd-kubernetes-manager/configuration.yaml:ro --network=host --read-only azd-kubernetes-manager:dev --token=${AZURE_DEVOPS_TOKEN} --url=${AZURE_DEVOPS_URL} --log=debug --config-file=/home/azd-kubernetes-manager/configuration.yaml
 
 docker-push:
 	sh docker-push.sh
@@ -41,7 +41,7 @@ helm-template:
 	helm template charts/azd-kubernetes-manager --values=example-helm-values.yaml
 
 helm-install:
-	helm upgrade --debug --install azd-kubernetes-manager charts/azd-kubernetes-manager --values=example-helm-values.yaml --set image.repository=azd-kubernetes-manager,image.tag=dev
+	helm upgrade --debug --install azd-kubernetes-manager charts/azd-kubernetes-manager --values=example-helm-values.yaml --set image.repository=azd-kubernetes-manager,image.tag=dev,rbac.psp.appArmorProfile=''
 
 helm-package:
 	helm package charts/azd-kubernetes-manager -d charts && \
