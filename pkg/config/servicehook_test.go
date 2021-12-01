@@ -3,9 +3,9 @@ package config_test
 import (
 	"testing"
 
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/azuredevops"
 
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/config"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/config"
 )
 
 func TestMatches(t *testing.T) {

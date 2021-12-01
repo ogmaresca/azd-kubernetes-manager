@@ -19,7 +19,7 @@ The configuration file is a YAML file. See [Configuration.md](Configuration.md) 
 First, add this repo to Helm:
 
 ``` bash
-helm repo add azd-kubernetes-manager https://raw.githubusercontent.com/ggmaresca/azd-kubernetes-manager/master/charts
+helm repo add azd-kubernetes-manager https://raw.githubusercontent.com/ogmaresca/azd-kubernetes-manager/master/charts
 helm repo update
 ```
 
@@ -38,7 +38,7 @@ helm upgrade --install --namespace=kube-public azd-kubernetes-manager azd-kubern
 | `minReadySeconds`                   | The deployment's `minReadySeconds`.                                                                                                                                                   | 0                                                                 |
 | `revisionHistoryLimit`              | Number of Deployment versions to keep.                                                                                                                                                | 10                                                                |
 | `updateStrategy`                    | The Deployment Update Strategy.                                                                                                                                                       | `{type:RollingUpdate,rollingUpdate:{maxUnavailable:0}}`           |
-| `image.repository`                  | The Docker Hub repository of the deployment.                                                                                                                                          | docker.io/gmaresca/azd-kubernetes-manager                         |
+| `image.repository`                  | The Docker Hub repository of the deployment.                                                                                                                                          | docker.io/ogmaresca/azd-kubernetes-manager                         |
 | `image.tag`                         | The image tag of the deployment.                                                                                                                                                      | latest version                                                    |
 | `image.pullPolicy`                  | The image pull policy.                                                                                                                                                                | IfNotPresent                                                      |
 | `image.pullSecrets`                 | Image Pull Secrets to use.                                                                                                                                                            | `[]`                                                              |
@@ -114,4 +114,4 @@ helm upgrade --install --namespace=kube-public azd-kubernetes-manager azd-kubern
 
 ## Docker Hub
 
-[Docker Hub link](https://hub.docker.com/r/gmaresca/azd-kubernetes-manager).
+[Docker Hub link](https://hub.docker.com/r/ogmaresca/azd-kubernetes-manager).

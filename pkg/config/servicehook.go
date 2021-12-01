@@ -8,8 +8,8 @@ import (
 
 	"github.com/alexcesaro/log/stdlog"
 
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/templating"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/azuredevops"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/templating"
 )
 
 var (

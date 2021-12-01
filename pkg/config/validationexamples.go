@@ -3,8 +3,8 @@ package config
 import (
 	"time"
 
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/templating"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/azuredevops"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/templating"
 )
 
 var (

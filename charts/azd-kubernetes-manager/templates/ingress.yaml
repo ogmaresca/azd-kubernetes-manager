@@ -1,5 +1,7 @@
 {{- if .Values.ingress.enabled }}
-{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1" }}
+{{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.Version }}
+apiVersion: networking.k8s.io/v1
+{{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1" }}
 apiVersion: networking.k8s.io/v1beta1
 {{- else }}
 apiVersion: extensions/v1beta1
@@ -15,6 +17,9 @@ metadata:
     {{- include "azd-kubernetes-manager.stringDict" .Values.ingress.annotations | nindent 4 }}
   {{- end }}
 spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className | quote }}
+  {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
   - host: {{ . | quote }}
@@ -22,8 +27,16 @@ spec:
       paths:
       - path: {{ $.Values.ingress.basePath | quote }}
         backend:
+        {{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.Version }}
+          service:
+            name: {{ include "azd-kubernetes-manager.fullname" $ }}
+            port:
+              name: http
+        pathType: Prefix
+        {{- else }}
           serviceName: {{ include "azd-kubernetes-manager.fullname" $ }}
           servicePort: http
+        {{- end }}
   {{- end }}
   {{- if .Values.ingress.tls.enabled }}
   tls:

@@ -1,11 +1,11 @@
 # Download trusted root certificates
-FROM alpine:3.11 AS ca-certificates
+FROM alpine:3.15 AS ca-certificates
 
 RUN apk add --no-cache ca-certificates && \
     update-ca-certificates
 
 # Download modules
-FROM golang:1.13-alpine3.11 AS base
+FROM golang:1.17-alpine3.15 AS base
 
 RUN apk add --no-cache git ca-certificates tzdata
 
@@ -25,6 +25,8 @@ FROM base AS build
 
 COPY main.go /go/src/main.go
 COPY pkg /go/src/pkg
+
+RUN go get
 
 RUN go build -ldflags="-w -s" -o /go/bin/azd-kubernetes-manager
 

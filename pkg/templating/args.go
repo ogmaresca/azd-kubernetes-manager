@@ -3,7 +3,7 @@ package templating
 import (
 	"time"
 
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/azuredevops"
 )
 
 // Args holds all of the values available to go templating at runtime

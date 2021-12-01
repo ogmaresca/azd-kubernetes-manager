@@ -7,7 +7,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/templating"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/templating"
 )
 
 // LabelSelector represents a k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector, because it doesn't have YAML tags

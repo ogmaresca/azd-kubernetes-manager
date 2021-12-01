@@ -13,11 +13,11 @@ import (
 
 	"github.com/alexcesaro/log/stdlog"
 
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/args"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/config"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/health"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/kubernetes"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/processors"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/args"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/config"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/health"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/kubernetes"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/processors"
 )
 
 var (

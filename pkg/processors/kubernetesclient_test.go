@@ -1,7 +1,7 @@
 package processors_test
 
 import (
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/kubernetes"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/azuredevops"
 )
 
 func TestDeserialize(t *testing.T) {

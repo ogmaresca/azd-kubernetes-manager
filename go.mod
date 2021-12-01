@@ -1,4 +1,4 @@
-module github.com/ggmaresca/azd-kubernetes-manager
+module github.com/ogmaresca/azd-kubernetes-manager
 
 go 1.13
 

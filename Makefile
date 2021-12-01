@@ -38,7 +38,7 @@ helm-lint:
 	helm lint charts/azd-kubernetes-manager
 
 helm-template:
-	helm template charts/azd-kubernetes-manager --values=example-helm-values.yaml
+	helm template charts/azd-kubernetes-manager --values=example-helm-values.yaml --debug
 
 helm-install:
 	helm upgrade --debug --install azd-kubernetes-manager charts/azd-kubernetes-manager --values=example-helm-values.yaml --set image.repository=azd-kubernetes-manager,image.tag=dev,rbac.psp.appArmorProfile=''

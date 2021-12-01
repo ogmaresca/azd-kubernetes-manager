@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/config"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/kubernetes"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/templating"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/config"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/kubernetes"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/templating"
 )
 
 // RuleHandler handles Kubernetes rules

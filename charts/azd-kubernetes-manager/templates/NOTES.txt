@@ -1,6 +1,6 @@
 Installs {{ .Chart.Description }}.
 
-See https://github.com/ggmaresca/azd-kubernetes-manager.
+See https://github.com/ogmaresca/azd-kubernetes-manager.
 
 
 {{- if .Values.ingress.enabled }}

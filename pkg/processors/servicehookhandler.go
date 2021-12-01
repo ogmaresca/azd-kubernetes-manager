@@ -12,10 +12,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/args"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/azuredevops"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/config"
-	"github.com/ggmaresca/azd-kubernetes-manager/pkg/templating"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/args"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/azuredevops"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/config"
+	"github.com/ogmaresca/azd-kubernetes-manager/pkg/templating"
 )
 
 var (

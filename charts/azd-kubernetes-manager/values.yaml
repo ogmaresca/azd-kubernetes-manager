@@ -15,7 +15,7 @@ updateStrategy:
     maxUnavailable: 0
 
 image:
-  repository: docker.io/gmaresca/azd-kubernetes-manager
+  repository: docker.io/ogmaresca/azd-kubernetes-manager
   tag: 1.0.3
   pullPolicy: IfNotPresent
   pullSecrets: []
@@ -63,6 +63,8 @@ service:
 ## Ingress for service hooks
 ingress:
   enabled: false
+  ## The ingressClassName
+  className:
   ## Labels to add to the deployment
   labels: {}
   ## Annotations to add to the deployment
